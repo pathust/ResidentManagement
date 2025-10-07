@@ -2,13 +2,6 @@
 -- Drop database if exists
 DROP DATABASE IF EXISTS RESIDENT_MANAGEMENT_DB;
 
-SHOW VARIABLES LIKE 'innodb_force_recovery';
-
-SELECT @@version, @@version_comment, @@basedir, @@datadir, @@port;
-SHOW VARIABLES LIKE 'log_error';
-SHOW VARIABLES LIKE 'innodb_force_recovery';
-
-
 -- Create database
 CREATE DATABASE RESIDENT_MANAGEMENT_DB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -46,17 +39,7 @@ CREATE TABLE role_permission (
     role_id INT NOT NULL,
     permission_id INT NOT NULL,
     UNIQUE INDEX r_p_UNIQUE (role_id ASC, permission_id ASC) VISIBLE
-    -- INDEX fk_rp_person_id_idx (permission_id ASC) VISIBLE,
-    -- CONSTRAINT fk_rp_role_id
-    --     FOREIGN KEY (role_id)
-    --     REFERENCES role(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_rp_permission_id
-    --     FOREIGN KEY (permission_id)
-    --     REFERENCES permission(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
+    -- INDEX fk_rp_person_id_idx (permission_id ASC) VISIBLE
 );
 
 -- ------------------------------
@@ -68,11 +51,6 @@ CREATE TABLE ward (
     name VARCHAR(255) NOT NULL,
     province_id INT NOT NULL,
     UNIQUE INDEX uq_ward_name_province (name ASC, province_id ASC) VISIBLE
-    -- CONSTRAINT fk_province_id
-    --     FOREIGN KEY (province_id)
-    --     REFERENCES province(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE province (
@@ -88,29 +66,24 @@ CREATE TABLE ethnicity (
 CREATE TABLE households (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     ward_id INT NOT NULL,
-    house_address_details VARCHAR(255) UNIQUE NULL DEFAULT NULL,
+    house_address_details VARCHAR(255) NULL DEFAULT NULL,
     code VARCHAR(50) UNIQUE NOT NULL,
     -- head_person_id INT,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    -- CONSTRAINT fk_h_ward_id
-    --     FOREIGN KEY (ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE persons (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     -- household_id INT,
-    current_household_id INT NOT NULL,
+    current_household_id INT NULL DEFAULT NULL,
     full_name VARCHAR(255) NOT NULL,
     -- alias VARCHAR(100),
     date_of_birth DATE,
     place_of_birth VARCHAR(255),
     -- origin VARCHAR(255),
-    place_of_origin_ward_id INT NOT NULL,
+    place_of_origin_ward_id INT NULL DEFAULT NULL,
     place_of_origin_details VARCHAR(255) NULL,
     ethnicity_id INT,
     religion VARCHAR(100) NULL DEFAULT NULL,
@@ -122,7 +95,7 @@ CREATE TABLE persons (
     id_issue_place VARCHAR(255),
     -- registration_date DATE,
     -- previous_address TEXT,
-    perm_address_ward_id INT NOT NULL,
+    perm_address_ward_id INT NULL DEFAULT NULL,
     temp_address_ward_id INT NULL DEFAULT NULL,
     perm_address_details VARCHAR(255) NULL DEFAULT NULL,
     temp_address_details VARCHAR(255) NULL DEFAULT NULL,
@@ -137,31 +110,6 @@ CREATE TABLE persons (
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    -- CONSTRAINT fk_p_household_id
-    --     FOREIGN KEY (current_household_id)
-    --     REFERENCES households(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_p_place_of_origin_ward_id
-    --     FOREIGN KEY (place_of_origin_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_p_ethnicity_id
-    --     FOREIGN KEY (ethnicity_id)
-    --     REFERENCES ethnicity(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_p_perm_address_ward_id
-    --     FOREIGN KEY (perm_address_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_p_temp_address_ward_id
-    --     FOREIGN KEY (temp_address_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE household_membership (
@@ -183,21 +131,6 @@ CREATE TABLE household_membership (
     UNIQUE INDEX uq_hm_one_active_membership_per_person (active_person_id ASC) VISIBLE,
     UNIQUE INDEX uq_hm_one_active_head_per_household (active_head_household_id ASC) INVISIBLE,
     INDEX idx_hm_household_active (household_id ASC, end_date ASC) VISIBLE
-    -- CONSTRAINT fk_hm_person_id
-    --     FOREIGN KEY (person_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_hm_household_id
-    --     FOREIGN KEY (household_id)
-    --     REFERENCES households(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_hm_prev_perm_address_ward_id
-    --     FOREIGN KEY (prev_perm_address_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 -- ------------------------------
@@ -215,21 +148,6 @@ CREATE TABLE household_address_change (
     INDEX fk_hac_household_id_idx (household_id ASC) VISIBLE,
     INDEX fk_hac_from_address_id_idx (from_address_ward_id ASC) VISIBLE,
     INDEX fk_hac_to_address_id_idx (to_address_ward_id ASC) VISIBLE
-    -- CONSTRAINT fk_hac_household_id
-    --     FOREIGN KEY (household_id)
-    --     REFERENCES households(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_hac_from_address_id
-    --     FOREIGN KEY (from_address_ward_id)
-    --     REFERENCES wards(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_hac_to_address_id
-    --     FOREIGN KEY (to_address_ward_id)
-    --     REFERENCES wards(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE household_head_change (
@@ -242,21 +160,6 @@ CREATE TABLE household_head_change (
     INDEX fk_hhc_household_id_idx (household_id ASC) VISIBLE,
     INDEX fk_hhc_from_person_id_idx (from_person_id ASC) VISIBLE,
     INDEX fk_hhc_to_person_id_idx (to_person_id ASC) VISIBLE
-    -- CONSTRAINT fk_hhc_household_id
-    --     FOREIGN KEY (household_id)
-    --     REFERENCES households(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_hhc_from_person_id
-    --     FOREIGN KEY (from_person_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_hhc_to_person_id
-    --     FOREIGN KEY (to_person_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE household_split (
@@ -269,16 +172,6 @@ CREATE TABLE household_split (
     INDEX idx_split_date (split_date ASC) VISIBLE,
     INDEX fk_from_household_id_idx (from_household_id ASC) VISIBLE,
     INDEX fk_to_household_id_idx (to_household_id ASC) VISIBLE
-    -- CONSTRAINT fk_hs_from_household_id
-    --     FOREIGN KEY (from_household_id)
-    --     REFERENCES households(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_hs_to_household_id
-    --     FOREIGN KEY (to_household_id)
-    --     REFERENCES households(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE household_split_member (
@@ -288,16 +181,6 @@ CREATE TABLE household_split_member (
     is_head TINYINT NOT NULL DEFAULT 0,
     INDEX fk_household_split_id_idx (household_split_id ASC) VISIBLE,
     INDEX fk_hsm_person_id_idx (person_id ASC) VISIBLE
-    -- CONSTRAINT fk_hsm_household_split_id
-    --     FOREIGN KEY (household_split_id)
-    --     REFERENCES household_split(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE CASCADE,
-    -- CONSTRAINT fk_hsm_person_id
-    --     FOREIGN KEY (person_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE household_event(
@@ -310,11 +193,6 @@ CREATE TABLE household_event(
     details TEXT,
     INDEX fk_he_household_id_idx (household_id ASC) VISIBLE,
     INDEX idx_he_household_date (household_id ASC, event_date ASC) VISIBLE
-    -- CONSTRAINT fk_he_household_id
-    --     FOREIGN KEY (household_id)
-    --     REFERENCES households(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 -- ------------------------------
@@ -335,21 +213,6 @@ CREATE TABLE temporary_residence (
     INDEX fk_tr_current_household_id_idx (current_household_id ASC) VISIBLE,
     INDEX id_tr_period (person_id ASC, start_date ASC, end_date ASC) VISIBLE,
     INDEX fk_tr_temp_address_ward_id_idx (temp_address_ward_id ASC) VISIBLE
-    -- CONSTRAINT fk_tr_person_id
-    --     FOREIGN KEY (person_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_tr_current_household_id
-    --     FOREIGN KEY (current_household_id)
-    --     REFERENCES households(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_tr_temp_address_ward_id
-    --     FOREIGN KEY (temp_address_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE temporary_absence (
@@ -362,8 +225,8 @@ CREATE TABLE temporary_absence (
     reason TEXT,
     perm_address_ward_id INT NOT NULL,
     temp_address_ward_id INT NULL DEFAULT NULL,
-    perm_address_details VARCHAR(45) NULL DEFAULT NULL,
-    temp_address_details VARCHAR(45) NULL DEFAULT NULL,
+    perm_address_details VARCHAR(255) NULL DEFAULT NULL,
+    temp_address_details VARCHAR(255) NULL DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX fk_ta_person_id_idx (person_id ASC) VISIBLE,
@@ -371,26 +234,6 @@ CREATE TABLE temporary_absence (
     INDEX idx_ta_period (person_id ASC, start_date ASC, end_date ASC) VISIBLE,
     INDEX fk_ta_perm_address_ward_id_idx (perm_address_ward_id ASC) VISIBLE,
     INDEX fk_ta_temp_address_ward_id_idx (temp_address_ward_id ASC) VISIBLE
-    -- CONSTRAINT fk_ta_person_id
-    --     FOREIGN KEY (person_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_ta_household_id
-    --     FOREIGN KEY (current_household_id)
-    --     REFERENCES households(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_ta_perm_address_ward_id
-    --     FOREIGN KEY (perm_address_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_ta_temp_address_ward_id
-    --     FOREIGN KEY (temp_address_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE permanent_residence_change (
@@ -409,26 +252,6 @@ CREATE TABLE permanent_residence_change (
     INDEX fk_pr_current_household_id_idx (current_household_id ASC) VISIBLE,
     INDEX fk_pr_prev_address_ward_id_idx (prev_address_ward_id ASC) VISIBLE,
     INDEX fk_pr_to_address_ward_id_idx (address_ward_id ASC) VISIBLE
-    -- CONSTRAINT fk_pr_person_id
-    --     FOREIGN KEY (person_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_pr_household_id
-    --     FOREIGN KEY (current_household_id)
-    --     REFERENCES households(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_pr_prev_address_ward_id
-    --     FOREIGN KEY (prev_address_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_pr_to_address_ward_id
-    --     FOREIGN KEY (address_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE birth_declare (
@@ -451,31 +274,6 @@ CREATE TABLE birth_declare (
     INDEX id_bd_father_d_idx (father_id ASC) VISIBLE,
     INDEX id_bd_mother_id_idx (mother_id ASC) VISIBLE,
     INDEX fk_bd_place_of_origin_ward_id_idx (place_of_origin_ward_id ASC) VISIBLE
-    -- CONSTRAINT fk_bd_declarer_id
-    --     FOREIGN KEY (declarer_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_bd_person_id
-    --     FOREIGN KEY (person_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_bd_father_id
-    --     FOREIGN KEY (father_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_bd_mother_id
-    --     FOREIGN KEY (mother_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_bd_place_of_origin_ward_id
-    --     FOREIGN KEY (place_of_origin_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE death_declare (
@@ -493,21 +291,6 @@ CREATE TABLE death_declare (
     INDEX fk_dd_person_id_idx (person_id ASC) VISIBLE,
     INDEX fk_dd_declarer_id_idx (declarer_id ASC) VISIBLE,
     INDEX fk_dd_last_perm_residence_ward_id_idx (last_permanent_residence_ward_id ASC) VISIBLE
-    -- CONSTRAINT fk_dd_person_id
-    --     FOREIGN KEY (person_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_dd_declarer_id
-    --     FOREIGN KEY (declarer_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION,
-    -- CONSTRAINT fk_dd_last_perm_residence_ward_id
-    --     FOREIGN KEY (last_permanent_residence_ward_id)
-    --     REFERENCES ward(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 CREATE TABLE person_event (
@@ -521,11 +304,6 @@ CREATE TABLE person_event (
     INDEX fk_pe_person_id_idx (person_id ASC) VISIBLE,
     INDEX idx_person_event (person_id ASC, created_at ASC) VISIBLE,
     INDEX idx_pe_person_date (person_id ASC, event_date ASC) VISIBLE
-    -- CONSTRAINT fk_pe_person_id
-    --     FOREIGN KEY (person_id)
-    --     REFERENCES persons(id)
-    --     ON DELETE NO ACTION
-    --     ON UPDATE NO ACTION
 );
 
 -- ------------------------------
