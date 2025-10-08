@@ -1,23 +1,56 @@
+-- Active: 1759857430738@@127.0.0.1@3306@resident_management_db
 -- Use database
 USE RESIDENT_MANAGEMENT_DB;
+
+
 
 -- ------------------------------
 -- II. RESIDENT DATA
 -- ------------------------------
 
+-- Insert provinces
+INSERT INTO province (name)
+VALUES ('Ho Chi Minh City'), ('Ha Noi');
+
+-- Insert wards
+INSERT INTO ward (name, province_id)
+VALUES ('Ward 1', 1), ('Ward 2', 1);
+
+-- Insert ethnicities
+INSERT INTO ethnicity (name)
+VALUES ('Kinh'), ('Hoa'), ('Tay');
+
 -- Insert a household
-INSERT INTO households (code, head_person_id, address_street, address_ward, address_district, notes, created_at, updated_at)
-VALUES ('HH001', NULL, '123 Nguyen Trai', 'Ward 1', 'District 1', 'Sample household', NOW(), NOW());
+INSERT INTO households (ward_id, house_address_details, code, notes, created_at, updated_at)
+VALUES  (1, '123 Nguyen Trai', 'HH001', 'Sample household', NOW(), NOW()),
+        (2, '456 Tran Hung Dao', 'HH002', 'Another household', NOW(), NOW());
 
 -- Insert persons (including head of household)
-INSERT INTO persons (household_id, full_name, alias, dob, birthplace, origin, ethnicity, religion, occupation, workplace, id_number, id_issue_date, id_issue_place, registration_date, previous_address, relation_to_head, status, notes, created_at, updated_at)
+INSERT INTO persons (current_household_id, full_name, date_of_birth, place_of_birth, 
+                    place_of_origin_ward_id, place_of_origin_details, ethnicity_id, religion, gender,
+                    occupation, workplace, id_number, id_issue_date, id_issue_place, 
+                    phone_number, email_address, status, notes, perm_address_ward_id, created_at, updated_at)
 VALUES
-    (1, 'Nguyen Van A', 'A', '1980-05-15', 'Ha Noi', 'Ha Noi', 'Kinh', 'Buddhism', 'Engineer', 'ABC Company', '123456789', '2010-01-01', 'Ha Noi', '2020-01-01', '456 Le Loi', 'Head', 'ACTIVE', 'Head of HH001', NOW(), NOW()),
-    (1, 'Tran Thi B', 'B', '1985-08-20', 'Da Nang', 'Da Nang', 'Kinh', 'None', 'Teacher', 'XYZ School', '987654321', '2015-03-15', 'Da Nang', '2020-01-01', '789 Hai Ba Trung', 'Wife', 'ACTIVE', 'Wife of head', NOW(), NOW()),
-    (1, 'Le Van C', 'C', '2010-03-10', 'Ho Chi Minh City', 'Ho Chi Minh City', 'Kinh', 'None', 'Student', 'School ABC', NULL, NULL, NULL, '2020-01-01', NULL, 'Son', 'ACTIVE', 'Son of head', NOW(), NOW());
+    (1, 'Nguyen Van A', '1980-05-15', 'Ho Chi Minh City', 
+    1, '123 Nguyen Trai', 1, 'Buddhism', 'M', 
+    'Engineer', 'ABC Company', '123456789', '2010-01-01', 'Ho Chi Minh City', 
+    '0123456789', 'nguyenvana@example.com', 'ALIVE', 'Head of HH001', 1, NOW(), NOW()),
+    (1, 'Tran Thi B', '1985-08-20', 'Ho Chi Minh City',
+    1, '123 Nguyen Trai', 1, 'Christian', 'F',
+    'Teacher', 'XYZ School', '987654321', '2012-02-02', 'Ho Chi Minh City',
+    '0987654321', 'tranthib@example.com', 'ALIVE', 'Wife of HH001', 1, NOW(), NOW()),
+    (1, 'Nguyen Van C', '2010-03-10', 'Ho Chi Minh City',
+    1, '123 Nguyen Trai', 1, 'None', 'M', 
+    'Student', 'School XYZ', NULL, NULL, NULL, 
+    NULL, NULL, 'ALIVE', 'Son of HH001', 1, NOW(), NOW());
+INSERT INTO household_membership (household_id, person_id, is_household_head, relation_to_head, start_date, end_date, registration_perm_date)
+VALUES
+    (1, 1, 1, 'Head', '2020-01-01', NULL, '2020-01-01'),
+    (1, 2, 0, 'Wife', '2020-01-01', NULL, '2020-01-01'),
+    (1, 3, 0, 'Son', '2020-01-01', NULL, '2020-01-01');  
 
 -- Update head_person_id in households
-UPDATE households SET head_person_id = 1 WHERE id = 1;
+-- UPDATE households SET head_person_id = 1 WHERE id = 1;
 
 -- ------------------------------
 -- III. FEE COLLECTION
