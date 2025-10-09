@@ -2,7 +2,14 @@
 -- Use database
 USE RESIDENT_MANAGEMENT_DB;
 
+INSERT INTO role(role)
+VALUES ('ADMIN'), ('COLLECTOR'), ('RESIDENT');
 
+INSERT INTO users (username, password_hash, role_id, manage_ward_id, created_at, updated_at)
+VALUES
+    ('admin', 'hashed_password_1', 1, NULL, NOW(), NOW()),
+    ('collector', 'hashed_password_2', 2, NULL, NOW(), NOW()),
+    ('resident', 'hashed_password_3', 3, 1, NOW(), NOW());
 
 -- ------------------------------
 -- II. RESIDENT DATA

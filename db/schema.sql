@@ -26,12 +26,12 @@ CREATE TABLE users (
 
 CREATE TABLE role (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    role VARCHAR(45) UNIQUE NOT NULL
+    role VARCHAR(45) UNIQUE NOT NULL --ADMIN, RESIDENT
 );
 
 CREATE TABLE permission (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    permission VARCHAR(45) UNIQUE NOT NULL
+    permission VARCHAR(45) UNIQUE NOT NULL --VIEW_DASHBOARD, MANAGE_USERS, VIEW_REPORTS
 );
 
 CREATE TABLE role_permission (
@@ -40,6 +40,7 @@ CREATE TABLE role_permission (
     permission_id INT NOT NULL,
     UNIQUE INDEX r_p_UNIQUE (role_id ASC, permission_id ASC) VISIBLE
     -- INDEX fk_rp_person_id_idx (permission_id ASC) VISIBLE
+    -- INSERT INTO role_permission (role_id, permission_id) VALUES (1, 1), (1, 2), (1, 3), (2, 1)
 );
 
 -- ------------------------------
