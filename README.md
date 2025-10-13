@@ -62,7 +62,8 @@ npm install
 cp .env.example .env
 
 # Start development server
-...
+npm run dev
+
 ```
 The frontend will start at `http://localhost:3000`
 
