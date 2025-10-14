@@ -43,8 +43,8 @@ source db/schema.sql
 cd backend
 
 # Copy environment file and configure
-cp .env.example .env
-# Edit .env with your database credentials
+cp application.properties.template application.properties
+# Edit application.properties with your database credentials
 
 # Install dependencies and run
 ./mvnw spring-boot:run

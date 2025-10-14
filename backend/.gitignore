@@ -1,14 +1,7 @@
-HELP.md
-
-.gitattributes
-
 target/
 *.jar
 *.war
 *.class
-.mvn/
-mvnw
-mvnw.cmd
 
 ### STS ###
 .apt_generated
