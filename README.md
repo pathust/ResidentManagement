@@ -36,6 +36,9 @@ mysql -u root -p
 
 # Run the schema script
 source db/schema.sql
+# Run the create instance script
+source db/instance.sql
+
 ```
 
 3. **Backend setup**
