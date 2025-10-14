@@ -36,6 +36,9 @@ mysql -u root -p
 
 # Run the schema script
 source db/schema.sql
+# Run the create instance script
+source db/instance.sql
+
 ```
 
 3. **Backend setup**
@@ -43,8 +46,8 @@ source db/schema.sql
 cd backend
 
 # Copy environment file and configure
-cp .env.example .env
-# Edit .env with your database credentials
+cp src/main/resources/application.properties.template src/main/resources/application.properties
+# Edit application.properties with your database credentials
 
 # Install dependencies and run
 ./mvnw spring-boot:run
