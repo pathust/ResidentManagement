@@ -20,7 +20,7 @@ import java.io.IOException;
 
 @Slf4j
 @Component
-public class JwtAuthenticationFilter extends SignupRequest {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
