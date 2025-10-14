@@ -8,11 +8,11 @@
         <version>3.4.10</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.residence</groupId>
-    <artifactId>backend</artifactId>
+    <groupId>com.soict</groupId>
+    <artifactId>resident-management</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>backend</name>
-    <description>backend</description>
+    <name>resident-management</name>
+    <description>Backend for Resident Management</description>
     <url/>
     <licenses>
         <license/>
