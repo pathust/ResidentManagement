@@ -43,7 +43,7 @@ source db/schema.sql
 cd backend
 
 # Copy environment file and configure
-cp application.properties.template application.properties
+cp src/main/resources/application.properties.template src/main/resources/application.properties
 # Edit application.properties with your database credentials
 
 # Install dependencies and run
