@@ -7,9 +7,9 @@ VALUES ('ADMIN'), ('COLLECTOR'), ('RESIDENT');
 
 INSERT INTO users (username, password_hash, role_id, manage_ward_id, created_at, updated_at)
 VALUES
-    ('admin', 'hashed_password_1', 1, NULL, NOW(), NOW()),
-    ('collector', 'hashed_password_2', 2, NULL, NOW(), NOW()),
-    ('resident', 'hashed_password_3', 3, 1, NOW(), NOW());
+    ('admin', '$2a$12$A8/XBc25xxufSCygqDp6TuBi5njm4YJw94EUuTlKNER8ozHPse5p2', 1, NULL, NOW(), NOW()),
+    ('collector', '$2a$12$mwoieiJRIVNg7oUjpfI2XeIes8UVFtc9CSxv9LBvkYMc0KVfMBy3u', 2, NULL, NOW(), NOW()),
+    ('resident', '$2a$12$Q6l6iky1PKKSwWIiXJwvtOXv9JE3MsJsBVSQP5augHTaq57ptBcwG', 3, 1, NOW(), NOW());
 
 -- ------------------------------
 -- II. RESIDENT DATA

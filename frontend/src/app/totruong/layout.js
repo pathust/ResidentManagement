@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Layout, Menu, Input, Badge, Avatar, Space, Typography } from "antd";
+import { Layout, Menu, Input, Badge, Avatar, Space, Typography, Button } from "antd";  // ← Thêm Button
 import {
   HomeOutlined,
   TeamOutlined,
@@ -12,6 +12,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -20,6 +21,7 @@ export default function ToTruongLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const menuItems = [
     {
@@ -101,26 +103,29 @@ export default function ToTruongLayout({ children }) {
 
           {/* Right side */}
           <Space size="large" align="center">
-						<Badge count={5}>
-							<BellOutlined style={{ fontSize: 20, color: "#595959" }} />
-						</Badge>
-						
-						<Space size="middle" align="center">
-							<Avatar size={40} src="https://i.pravatar.cc/40" />
-							<div style={{ lineHeight: 1.2 }}>
-								<div>
-									<Text strong style={{ fontSize: 14 }}>
-										Nguyễn Văn A
-									</Text>
-								</div>
-								<div>
-									<Text type="secondary" style={{ fontSize: 12 }}>
-										Tổ trưởng
-									</Text>
-								</div>
-							</div>
-						</Space>
-					</Space>
+            <Badge count={5}>
+              <BellOutlined style={{ fontSize: 20, color: "#595959" }} />
+            </Badge>
+            
+            <Space size="middle" align="center">
+              <Avatar size={40} src="https://i.pravatar.cc/40" />
+              <div style={{ lineHeight: 1.2 }}>
+                <div>
+                  <Text strong style={{ fontSize: 14 }}>
+                    {user?.username || "Nguyễn Văn A"}
+                  </Text>
+                </div>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    Tổ trưởng
+                  </Text>
+                </div>
+              </div>
+              <Button type="text" danger onClick={logout}>
+                Đăng xuất
+              </Button>
+            </Space>
+          </Space>
         </Header>
 
         {/* Content */}
