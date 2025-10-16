@@ -1,15 +1,26 @@
 -- Active: 1759857430738@@127.0.0.1@3306@resident_management_db
 -- Use database
+CREATE DATABASE IF NOT EXISTS RESIDENT_MANAGEMENT_DB;
 USE RESIDENT_MANAGEMENT_DB;
 
-INSERT INTO role(role)
-VALUES ('ADMIN'), ('COLLECTOR'), ('RESIDENT');
+INSERT INTO roles(role)
+VALUES ('ADMIN'), ('MANAGER'), ('COLLECTOR'), ('RESIDENT');
+
+INSERT INTO permissions(permission)
+VALUES ('VIEW_DASHBOARD'), ('MANAGE_USERS'), ('VIEW_REPORTS'), ('COLLECT_FEES'), ('MANAGE_FUNDS');
+
+INSERT INTO role_permission(role_id, permission_id)
+VALUES
+    (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), -- ADMIN has all permissions
+    (2, 1), (2, 2), (2, 3),               -- MANAGER can view dashboard, manage users, view reports
+    (3, 1), (3, 4),                       -- COLLECTOR can view dashboard and collect fees
+    (4, 1);                               -- RESIDENT can only view dashboard
 
 INSERT INTO users (username, password_hash, role_id, manage_ward_id, created_at, updated_at)
 VALUES
     ('admin', 'hashed_password_1', 1, NULL, NOW(), NOW()),
     ('collector', 'hashed_password_2', 2, NULL, NOW(), NOW()),
-    ('resident', 'hashed_password_3', 3, 1, NOW(), NOW());
+    ('resident', 'hashed_password_3', 3, NULL, NOW(), NOW());
 
 -- ------------------------------
 -- II. RESIDENT DATA

@@ -24,14 +24,14 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE role (
+CREATE TABLE roles (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    role VARCHAR(45) UNIQUE NOT NULL --ADMIN, RESIDENT
+    role VARCHAR(45) UNIQUE NOT NULL
 );
 
-CREATE TABLE permission (
+CREATE TABLE permissions(
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    permission VARCHAR(45) UNIQUE NOT NULL --VIEW_DASHBOARD, MANAGE_USERS, VIEW_REPORTS
+    permission VARCHAR(45) UNIQUE NOT NULL
 );
 
 CREATE TABLE role_permission (
@@ -429,7 +429,7 @@ CREATE TABLE fund_transfers (
 ALTER TABLE users
     ADD CONSTRAINT fk_ua_role_id 
         FOREIGN KEY (role_id) 
-        REFERENCES role (id) 
+        REFERENCES roles(id) 
         ON DELETE NO ACTION,
     ADD CONSTRAINT fk_ua_manage_ward_id
         FOREIGN KEY (manage_ward_id)
@@ -440,12 +440,12 @@ ALTER TABLE users
 ALTER TABLE role_permission
     ADD CONSTRAINT fk_rp_role_id
         FOREIGN KEY (role_id)
-        REFERENCES role(id)
+        REFERENCES roles(id)
         ON DELETE NO ACTION
         ON UPDATE NO ACTION,
     ADD CONSTRAINT fk_rp_permission_id
         FOREIGN KEY (permission_id)
-        REFERENCES permission(id)
+        REFERENCES permissions(id)
         ON DELETE NO ACTION
         ON UPDATE NO ACTION;
 
