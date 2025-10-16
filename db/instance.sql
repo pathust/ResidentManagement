@@ -102,3 +102,30 @@ VALUES
 INSERT INTO expenses (fund_id, expense_date, amount, description, approver_user_id, recipient, proof, status, notes, created_at, updated_at)
 VALUES
     (1, '2025-10-05', 300000.00, 'Office supplies', 1, 'Office Depot', 'invoice_001.pdf', 'APPROVED', 'Approved expense', NOW(), NOW());
+
+
+-- Thêm một quỹ mới dành riêng cho việc khen thưởng
+INSERT INTO funds (name, description, type, currency, balance, created_at, updated_at)
+VALUES
+    ('Quỹ Khen Thưởng', 'Quỹ dùng để trao thưởng cho các cá nhân/tập thể có thành tích', 'RESTRICTED', 'VND', 5000000.00, NOW(), NOW());
+
+-- Ghi nhận giao dịch nạp tiền ban đầu cho Quỹ Khen Thưởng (giả sử quỹ mới này có id = 2)
+INSERT INTO fund_transactions (fund_id, transaction_type, amount, transaction_date, reference_type, user_id, notes, created_at)
+VALUES
+    (2, 'INFLOW', 5000000.00, '2025-10-01', 'INITIAL', 1, 'Nạp tiền ban đầu cho Quỹ Khen Thưởng', NOW());
+
+-- Thêm một loại khen thưởng duy nhất để test
+INSERT INTO reward_types (name, description, default_amount, created_at, updated_at)
+VALUES
+    ('Học sinh Giỏi', 'Khen thưởng cho học sinh có thành tích xuất sắc', 100000.00, NOW(), NOW());
+
+-- Thêm sự kiện khen thưởng, LẤY TIỀN TỪ QUỸ KHEN THƯỞNG (fund_id = 2)
+INSERT INTO reward_events (name, event_date, fund_id, approver_user_id, status, created_at, updated_at)
+VALUES
+    ('Lễ tuyên dương học sinh giỏi năm 2025', '2025-10-15', 2, 1, 'COMPLETED', NOW(), NOW());
+
+-- Thêm chi tiết khen thưởng cho cá nhân trong sự kiện trên
+INSERT INTO person_rewards (reward_event_id, person_id, reward_type_id, awarded_amount, gift_description, status, payout_date, created_at, updated_at)
+VALUES
+    -- Nguyễn Văn C (person_id=3) nhận thưởng 'Học sinh Giỏi' (reward_type_id=1)
+    (1, 3, 1, 100000.00, 'Tiền mặt và 10 quyển vở', 'PAID', '2025-10-16', NOW(), NOW());
