@@ -422,6 +422,45 @@ CREATE TABLE fund_transfers (
 );
 
 -- ------------------------------
+-- VII. REWARD EVENT
+-- ------------------------------
+
+-- Giữ nguyên, đã tối ưu
+CREATE TABLE reward_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT,
+    default_amount DECIMAL(15,2) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE reward_events (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    event_date DATE NOT NULL,
+    fund_id INT NOT NULL,
+    approver_user_id INT,
+    status ENUM('PENDING', 'APPROVED', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE person_rewards (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    reward_event_id INT NOT NULL,
+    person_id INT NOT NULL,
+    reward_type_id INT NOT NULL,
+    awarded_amount DECIMAL(15,2) NOT NULL,
+    gift_description TEXT,
+    status ENUM('PENDING', 'APPROVED', 'PAID', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    payout_date DATE NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE INDEX uq_person_reward_event (reward_event_id, person_id, reward_type_id)
+);
+
+-- ------------------------------
 -- VII. FOREIGN KEY CONSTRAINTS
 -- ------------------------------
 
@@ -757,6 +796,37 @@ FOREIGN KEY (dest_fund_id) REFERENCES funds(id),
 ADD CONSTRAINT fk_fund_transfers_user
 FOREIGN KEY (user_id) REFERENCES users(id);
 
+-- Reward Events FK
+ALTER TABLE reward_events
+    ADD CONSTRAINT fk_re_fund_id
+        FOREIGN KEY (fund_id)
+        REFERENCES funds(id)
+        ON DELETE RESTRICT
+        ON UPDATE NO ACTION,
+    ADD CONSTRAINT fk_re_approver_user_id
+        FOREIGN KEY (approver_user_id)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+        ON UPDATE NO ACTION;
+
+-- Person Rewards FK
+ALTER TABLE person_rewards
+    ADD CONSTRAINT fk_pr_reward_event_id
+        FOREIGN KEY (reward_event_id)
+        REFERENCES reward_events(id)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION,
+    ADD CONSTRAINT fk_pr_person_id_for_reward
+        FOREIGN KEY (person_id)
+        REFERENCES persons(id)
+        ON DELETE RESTRICT
+        ON UPDATE NO ACTION,
+        ADD CONSTRAINT fk_pr_reward_type_id
+        FOREIGN KEY (reward_type_id)
+        REFERENCES reward_types(id)
+        ON DELETE RESTRICT
+        ON UPDATE NO ACTION;
+
 -- ------------------------------
 -- VIII. INDEXES FOR PERFORMANCE
 -- ------------------------------
@@ -768,3 +838,42 @@ CREATE INDEX idx_persons_status ON persons(status);
 CREATE INDEX idx_payments_status ON payments(status);
 CREATE INDEX idx_collection_events_date ON collection_events(event_date);
 CREATE INDEX idx_fund_transactions_date ON fund_transactions(transaction_date);
+CREATE INDEX idx_re_event_date ON reward_events(event_date);
+-- Tìm kiếm tất cả phần thưởng của một người
+CREATE INDEX idx_pr_person_id ON person_rewards(person_id);
+-- Tìm kiếm theo loại phần thưởng
+CREATE INDEX idx_pr_reward_type_id ON person_rewards(reward_type_id);
+
+-- ------------------------------
+-- IX. TRIGGER TO CHECK FUND FOR REWARD EVENTS
+-- ------------------------------
+
+DELIMITER $$
+
+CREATE TRIGGER trg_check_fund_balance_after_reward_change
+    AFTER INSERT ON person_rewards
+    FOR EACH ROW
+BEGIN
+    DECLARE v_fund_id INT;
+    DECLARE v_total_reward_amount DECIMAL(15, 2);
+    DECLARE v_fund_balance DECIMAL(15, 2);
+
+    SELECT fund_id INTO v_fund_id
+    FROM reward_events
+    WHERE id = NEW.reward_event_id;
+
+    SELECT SUM(awarded_amount) INTO v_total_reward_amount
+    FROM person_rewards
+    WHERE reward_event_id = NEW.reward_event_id;
+
+    SELECT balance INTO v_fund_balance
+    FROM funds
+    WHERE id = v_fund_id;
+
+    IF v_total_reward_amount > v_fund_balance THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Operation failed: Total reward amount for this event exceeds the available fund balance.';
+END IF;
+END$$
+
+DELIMITER ;

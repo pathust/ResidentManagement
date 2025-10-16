@@ -1,48 +1,34 @@
 "use client";
 
-import React from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Space, Typography, Card } from "antd";
-
-const { Title } = Typography;
+import { useAuth } from "@/contexts/AuthContext";
+import { Spin } from "antd";
 
 export default function HomePage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
 
-  // Các role mock
-  const roles = [
-    { label: "Admin", path: "/admin" },
-    { label: "Tổ trưởng", path: "/totruong" },
-    // { label: "User", path: "/user" },
-  ];
+  useEffect(() => {
+    if (!loading) {
+      if (user) {
+        router.push("/totruong");
+      } else {
+        router.push("/login");
+      }
+    }
+  }, [user, loading, router]);
 
   return (
     <div
       style={{
         display: "flex",
-        minHeight: "100vh",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#f0f2f5",
-        padding: 20,
+        minHeight: "100vh",
       }}
     >
-      <Card style={{ padding: 40, textAlign: "center", width: 300 }}>
-        <Title level={3}>Chọn vai trò để vào hệ thống</Title>
-        <Space direction="vertical" size="large" style={{ marginTop: 20, width: "100%" }}>
-          {roles.map((role) => (
-            <Button
-              key={role.label}
-              type="primary"
-              size="large"
-              block
-              onClick={() => router.push(role.path)}
-            >
-              {role.label}
-            </Button>
-          ))}
-        </Space>
-      </Card>
+      <Spin size="large" />
     </div>
   );
 }

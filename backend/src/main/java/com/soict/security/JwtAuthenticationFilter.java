@@ -1,6 +1,5 @@
 package com.soict.security;
 
-import com.soict.dto.SignupRequest;
 import com.soict.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
