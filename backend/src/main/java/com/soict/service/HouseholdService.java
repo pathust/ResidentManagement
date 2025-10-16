@@ -1,8 +1,8 @@
 package com.soict.service;
 
-import com.soict.dto.HouseholdDTO;
-import com.soict.entity.Household;
-import com.soict.repository.HouseholdRepository;
+import com.soict.dto.household.HouseholdDTO;
+import com.soict.entity.household.Household;
+import com.soict.repository.household.HouseholdRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class HouseholdService {
         HouseholdDTO dto = new HouseholdDTO();
         dto.setId(entity.getId());
         dto.setCode(entity.getCode());
-        dto.setAddressStreet(entity.getAddressStreet());
+        dto.setHouseAddressDetails(entity.getHouseAddressDetails());
         return dto;
     }
 }

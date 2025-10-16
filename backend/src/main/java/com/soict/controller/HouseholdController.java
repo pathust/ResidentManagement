@@ -1,6 +1,6 @@
 package com.soict.controller;
 
-import com.soict.dto.HouseholdDTO;
+import com.soict.dto.household.HouseholdDTO;
 import com.soict.service.HouseholdService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

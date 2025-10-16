@@ -1,16 +1,18 @@
 package com.soict.service;
 
-import com.soict.dto.LoginRequest;
-import com.soict.dto.LoginResponse;
-import com.soict.repository.UserRepository;
+import com.soict.dto.auth.LoginRequest;
+import com.soict.dto.auth.LoginResponse;
 import com.soict.security.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -37,9 +39,23 @@ public class AuthService {
 
         log.info("User logged in successfully: {}", request.getUsername());
 
-        LoginResponse response = new LoginResponse();
-        response.setToken(token);
-        return response;
+        // 1. Trích xuất Role từ danh sách authorities
+        // Giả sử Role luôn có tiền tố "ROLE_"
+        String role = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(auth -> auth.startsWith("ROLE_"))
+                .findFirst()
+                .map(auth -> auth.replace("ROLE_", "")) // Bỏ tiền tố "ROLE_"
+                .orElse(null);
+
+        // 2. Trích xuất Permissions (những authority không phải là role)
+        List<String> permissions = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(auth -> !auth.startsWith("ROLE_"))
+                .collect(Collectors.toList());
+
+        // 3. Tạo đối tượng response mới với đầy đủ thông tin
+        return new LoginResponse(token, role, permissions);
     }
 
     public void logout(String token) {

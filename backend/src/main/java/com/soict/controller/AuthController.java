@@ -1,7 +1,7 @@
 package com.soict.controller;
 
-import com.soict.dto.LoginRequest;
-import com.soict.dto.LoginResponse;
+import com.soict.dto.auth.LoginRequest;
+import com.soict.dto.auth.LoginResponse;
 import com.soict.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

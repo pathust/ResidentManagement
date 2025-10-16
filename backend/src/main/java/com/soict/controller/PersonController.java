@@ -1,6 +1,6 @@
 package com.soict.controller;
 
-import com.soict.dto.PersonDTO;
+import com.soict.dto.person.PersonDTO;
 import com.soict.service.PersonService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
