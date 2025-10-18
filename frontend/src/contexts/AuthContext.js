@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -8,17 +8,13 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Kiểm tra token từ localStorage khi app load
-    const savedToken = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
 
-    if (savedToken && savedUser) {
-      setToken(savedToken);
+    if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
     setLoading(false);
@@ -27,17 +23,12 @@ export function AuthProvider({ children }) {
   const login = async (username, password) => {
     try {
       const response = await authAPI.login(username, password);
-      const { token } = response;
 
-      // Lưu token và user info
-      localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify({ username }));
 
-      setToken(token);
       setUser({ username });
 
-      // Redirect dựa vào role (mock - có thể decode JWT để lấy role)
-      router.push("/totruong");
+      router.replace("/dashboard");
       
       return { success: true };
     } catch (error) {
@@ -54,16 +45,14 @@ export function AuthProvider({ children }) {
       console.error("Logout error:", error);
     } finally {
       // Xóa token và user info
-      localStorage.removeItem("token");
       localStorage.removeItem("user");
-      setToken(null);
       setUser(null);
-      router.push("/login");
+      router.replace("/login");
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
