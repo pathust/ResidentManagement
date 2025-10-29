@@ -1,7 +1,6 @@
 package com.soict.entity.household.event;
 
 import com.soict.entity.household.Household;
-import com.soict.entity.person.Person;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,22 +13,23 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class HouseholdHeadChange {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "household_id", nullable = false)
     private Household household;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_person_id", nullable = false)
-    private Person fromPerson;
+    private com.soict.entity.person.Person fromPerson;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_person_id", nullable = false)
-    private Person toPerson;
+    private com.soict.entity.person.Person toPerson;
 
     @Column(name = "change_date", nullable = false)
     private LocalDate changeDate;

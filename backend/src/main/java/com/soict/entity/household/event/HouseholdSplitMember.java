@@ -1,6 +1,5 @@
 package com.soict.entity.household.event;
 
-import com.soict.entity.person.Person;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,18 +9,19 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class HouseholdSplitMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "household_split_id", nullable = false)
     private HouseholdSplit householdSplit;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "person_id", nullable = false)
-    private Person person;
+    private com.soict.entity.person.Person person;
 
     @Column(name = "is_head", nullable = false)
     private Boolean isHead = false;

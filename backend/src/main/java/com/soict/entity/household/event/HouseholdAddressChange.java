@@ -14,25 +14,25 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class HouseholdAddressChange {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "household_id", nullable = false)
     private Household household;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_address_ward_id", nullable = false)
     private Ward fromAddressWard;
 
     @Column(name = "from_address_details")
     private String fromAddressDetails;
 
-    @ManyToOne
-    @JoinColumn(name = "to_address_ward_id", nullable = false)
-    private Ward toAddressWard;
+    @Column(name = "to_address_ward_id", nullable = false)
+    private Integer toAddressWardId;
 
     @Column(name = "to_address_details")
     private String toAddressDetails;

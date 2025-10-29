@@ -1,4 +1,4 @@
-package com.soict.dto.reward.fee;
+package com.soict.entity.fee;
 
 import com.soict.entity.fund.Fund;
 import com.soict.entity.household.Household;

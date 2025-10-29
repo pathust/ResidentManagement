@@ -2,14 +2,10 @@ package com.soict.entity.household.event;
 
 import com.soict.entity.household.Household;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
 @Table(name = "household_split")
@@ -17,28 +13,26 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class HouseholdSplit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_household_id", nullable = false)
     private Household fromHousehold;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_household_id", nullable = false)
     private Household toHousehold;
 
     @Column(name = "split_date", nullable = false)
     private LocalDate splitDate;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
     @Column(columnDefinition = "TEXT")
     private String note;
 
-    @OneToMany(mappedBy = "householdSplit")
-    private Set<HouseholdSplitMember> members;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

@@ -1,6 +1,5 @@
 package com.soict.entity.household;
 
-import com.soict.entity.person.Person;
 import com.soict.entity.location.Ward;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,18 +12,19 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class HouseholdMembership {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "household_id", nullable = false)
     private Household household;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "person_id", nullable = false)
-    private Person person;
+    private com.soict.entity.person.Person person;
 
     @Column(name = "is_household_head", nullable = false)
     private Boolean isHouseholdHead = false;
@@ -41,7 +41,7 @@ public class HouseholdMembership {
     @Column(name = "registration_perm_date")
     private LocalDate registrationPermDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prev_perm_address_ward_id")
     private Ward prevPermAddressWard;
 
