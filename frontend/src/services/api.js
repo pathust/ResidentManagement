@@ -1,12 +1,14 @@
-const API_BASE_URL = 'http://localhost:8080';
+//client service calls for API interactions
+//client call frontend
 
 export const authAPI = {
   login: async (username, password) => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({ username, password }),
     });
 
@@ -19,11 +21,9 @@ export const authAPI = {
   },
 
   logout: async (token) => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+    const response = await fetch('/api/auth/logout', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -36,7 +36,7 @@ export const authAPI = {
 
 export const householdAPI = {
   getAll: async (token) => {
-    const response = await fetch(`${API_BASE_URL}/api/households`, {
+    const response = await fetch('/api/households', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -53,7 +53,7 @@ export const householdAPI = {
 
 export const personAPI = {
   getAll: async (token) => {
-    const response = await fetch(`${API_BASE_URL}/api/persons`, {
+    const response = await fetch('/api/persons', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

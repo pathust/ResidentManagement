@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
 import React, { useState } from "react";
-import { Layout, Menu, Input, Badge, Avatar, Space, Typography, Button } from "antd";  // ← Thêm Button
+import { Layout, Menu, Input, Badge, Avatar, Space, Typography, Button } from "antd";
 import {
   HomeOutlined,
   TeamOutlined,
@@ -17,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
 
-export default function ToTruongLayout({ children }) {
+export default function DashboardLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -25,26 +25,31 @@ export default function ToTruongLayout({ children }) {
 
   const menuItems = [
     {
-      key: "/totruong",
+      key: "/dashboard",
+      icon: <TeamOutlined />,
+      label: "Tổng quan",
+    },
+    {
+      key: "/dashboard/hokhau",
       icon: <HomeOutlined />,
       label: "Quản lý Hộ khẩu",
     },
     {
-      key: "/totruong/nhankhau",
+      key: "/dashboard/nhankhau",
       icon: <UserOutlined />,
       label: "Quản lý Nhân khẩu",
     },
     {
-      key: "/totruong/tamtru",
+      key: "/dashboard/tamtru",
       icon: <SwapOutlined />,
       label: "Tạm trú - Tạm vắng",
     },
     {
-      key: "/totruong/thongke",
+      key: "/dashboard/thongke",
       icon: <BarChartOutlined />,
       label: "Thống kê & Tìm kiếm",
     },
-  ];
+  ];  
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
