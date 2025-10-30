@@ -20,7 +20,7 @@ export const authAPI = {
     return response.json();
   },
 
-  logout: async (token) => {
+  logout: async () => {
     const response = await fetch('/api/auth/logout', {
       method: 'POST',
       credentials: 'include',
