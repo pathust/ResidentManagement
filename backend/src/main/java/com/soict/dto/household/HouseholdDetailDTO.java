@@ -1,31 +1,28 @@
 package com.soict.dto.household;
 
-import jakarta.validation.constraints.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class HouseholdDTO {
+public class HouseholdDetailDTO {
     private Integer id;
-
-    @NotNull
     private Integer wardId;
     private String wardName;
     private String provinceName;
-
-    @Size(max = 255)
     private String houseAddressDetails;
-
-    @NotBlank
-    @Size(max = 50)
     private String code;
-
-    private Integer memberCount;
+    private Integer headPersonId;
+    private String headPersonName;
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<HouseholdMemberDTO> members;
 }
-

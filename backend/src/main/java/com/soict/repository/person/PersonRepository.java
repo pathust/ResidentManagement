@@ -1,15 +1,13 @@
 package com.soict.repository.person;
 
-import com.soict.entity.person.Person;
+import com.soict.entity.person.*;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
-public interface PersonRepository extends JpaRepository<Person, Integer> {
-    Optional<Person> findByIdNumber(String idNumber);
-    List<Person> findByCurrentHouseholdId(Integer householdId);
-    List<Person> findByFullNameContainingIgnoreCase(String name);
+public interface PersonRepository extends JpaRepository<Person, Integer>, JpaSpecificationExecutor<Person> {
+
+    boolean existsByIdNumber(String idNumber);
 }
+

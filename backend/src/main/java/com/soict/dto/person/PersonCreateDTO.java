@@ -1,17 +1,18 @@
 package com.soict.dto.person;
 
 import jakarta.validation.constraints.*;
-import lombok.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+import java.time.LocalDate;
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PersonDTO {
-    private Integer id;
+public class PersonCreateDTO {
 
     @NotBlank(message = "Full name is required")
     @Size(max = 255)
@@ -23,14 +24,14 @@ public class PersonDTO {
     @Size(max = 255)
     private String placeOfBirth;
 
+    @NotNull(message = "Place of origin ward is required")
     private Integer placeOfOriginWardId;
-    private String placeOfOriginWardName;
 
     @Size(max = 255)
     private String placeOfOriginDetails;
 
+    @NotNull(message = "Ethnicity is required")
     private Integer ethnicityId;
-    private String ethnicityName;
 
     @Size(max = 100)
     private String religion;
@@ -53,16 +54,14 @@ public class PersonDTO {
     private String idIssuePlace;
 
     private Integer currentHouseholdId;
-    private String currentHouseholdCode;
 
+    @NotNull(message = "Permanent address ward is required")
     private Integer permAddressWardId;
-    private String permAddressWardName;
 
     @Size(max = 255)
     private String permAddressDetails;
 
     private Integer tempAddressWardId;
-    private String tempAddressWardName;
 
     @Size(max = 255)
     private String tempAddressDetails;
@@ -78,7 +77,4 @@ public class PersonDTO {
     private String status; // ALIVE, DEAD
 
     private String notes;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }
-

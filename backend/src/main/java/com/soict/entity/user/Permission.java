@@ -21,7 +21,7 @@ public class Permission {
     private String permission;
 
     @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY)
-    @ToString.Exclude // Quan trọng: Ngăn vòng lặp vô hạn khi gọi toString()
+    @ToString.Exclude
     private Set<RolePermission> rolePermissions;
 
     @Override

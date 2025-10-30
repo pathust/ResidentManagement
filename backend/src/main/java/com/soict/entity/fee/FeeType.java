@@ -1,4 +1,4 @@
-package com.soict.dto.reward.fee;
+package com.soict.entity.fee;
 
 import jakarta.persistence.*;
 import lombok.*;

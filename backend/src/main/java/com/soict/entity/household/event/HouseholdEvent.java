@@ -13,12 +13,13 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class HouseholdEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "household_id", nullable = false)
     private Household household;
 
@@ -28,12 +29,12 @@ public class HouseholdEvent {
     @Column(name = "event_date", nullable = false)
     private LocalDate eventDate;
 
+    @Column(columnDefinition = "TEXT")
+    private String details;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
-
-    @Column(columnDefinition = "TEXT")
-    private String details;
 }
