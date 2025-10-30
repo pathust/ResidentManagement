@@ -27,8 +27,6 @@ export function AuthProvider({ children }) {
       localStorage.setItem("user", JSON.stringify({ username }));
 
       setUser({ username });
-
-      router.replace("/dashboard");
       
       return { success: true };
     } catch (error) {
@@ -38,13 +36,10 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      if (token) {
-        await authAPI.logout(token);
-      }
+      await authAPI.logout();
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      // Xóa token và user info
       localStorage.removeItem("user");
       setUser(null);
       router.replace("/login");

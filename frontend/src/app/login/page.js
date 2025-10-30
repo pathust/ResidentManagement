@@ -4,12 +4,14 @@ import React, { useState } from "react";
 import { Form, Input, Button, Card, Typography, message } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 const { Title, Text } = Typography;
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const router = useRouter();
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -18,6 +20,7 @@ export default function LoginPage() {
 
     if (result.success) {
       message.success("Đăng nhập thành công!");
+      router.replace("/dashboard");
     } else {
       message.error(result.error || "Đăng nhập thất bại!");
     }
