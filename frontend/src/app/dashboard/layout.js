@@ -76,7 +76,7 @@ export default function DashboardLayout({ children }) {
             color: "#1890ff",
           }}
         >
-          {collapsed ? "QLD" : "Quản lý Dân cư"}
+          {collapsed ? "QLDC" : "Quản lý Dân cư"}
         </div>
         <Menu
           mode="inline"

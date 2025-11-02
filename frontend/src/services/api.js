@@ -52,18 +52,18 @@ export const householdAPI = {
 };
 
 export const personAPI = {
-  getAll: async (token) => {
+  getAll: async () => {
     const response = await fetch('/api/persons', {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      credentials: 'include',
     });
 
     if (!response.ok) {
       throw new Error('Failed to fetch persons');
     }
 
-    return response.json();
+    const data = await response.json();
+
+    return data;
   },
 };
