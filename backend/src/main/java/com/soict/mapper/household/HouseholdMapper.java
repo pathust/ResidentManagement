@@ -1,4 +1,4 @@
-package com.soict.mapper;
+package com.soict.mapper.household;
 
 import com.soict.dto.household.*;
 import com.soict.entity.household.*;

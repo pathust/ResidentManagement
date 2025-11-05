@@ -2,13 +2,11 @@ package com.soict.service;
 
 import com.soict.dto.household.*;
 import com.soict.entity.household.*;
-import com.soict.entity.household.event.*;
 import com.soict.entity.person.Person;
 import com.soict.exception.ResourceNotFoundException;
 import com.soict.exception.BusinessException;
-import com.soict.mapper.HouseholdMapper;
+import com.soict.mapper.household.HouseholdMapper;
 import com.soict.repository.household.*;
-import com.soict.repository.household.event.*;
 import com.soict.repository.person.PersonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

@@ -1,4 +1,4 @@
-package com.soict.controller;
+package com.soict.controller.household;
 
 import com.soict.dto.household.*;
 import com.soict.service.HouseholdService;
