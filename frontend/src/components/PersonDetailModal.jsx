@@ -10,31 +10,39 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
 
   const handleEdit = () => {
     setEditing(true);
-    form.setFieldsValue(person);
   };
 
   const handleCancelEdit = () => {
     setEditing(false);
-    form.resetFields();
+    form.setFieldsValue(person);
   };
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      if (onSubmit) onSubmit(values);
-      setEditing(false);
+      values.idIssueDate = values.idIssueDate?.format("YYYY-MM-DD");
+      values.dateOfBirth = values.dateOfBirth?.format("YYYY-MM-DD");
+
+      if (onSubmit) await onSubmit(values);
     } catch (error) {
       console.log("Validation failed:", error);
+    } finally {
+      setEditing(false);
+      form.setFieldsValue(person);
     }
   };
 
   useEffect(() => {
     const reselectHandler = () => {
-      form.setFieldsValue({
-        ...person,
-      })
+      person.idIssueDate = person.idIssueDate && dayjs(person.idIssueDate).isValid()
+        ? dayjs(person.idIssueDate)
+        : null;
+        
+      person.dateOfBirth = person.dateOfBirth && dayjs(person.dateOfBirth).isValid()
+        ? dayjs(person.dateOfBirth)
+        : null;
 
-      form.set
+      form.setFieldsValue(person);
     }
 
     reselectHandler();
@@ -62,17 +70,6 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
         form={form}
         layout="vertical"
         // disabled={!editing}
-        initialValues={{
-          ...person,
-          idIssueDate:
-            person.idIssueDate && dayjs(person.idIssueDate).isValid()
-              ? dayjs(person.idIssueDate)
-              : null,
-          dateOfBirth:
-            person.dateOfBirth && dayjs(person.dateOfBirth).isValid()
-              ? dayjs(person.dateOfBirth)
-              : null
-        }}
         className={`space-y-6 ${editing?"":"pointer-events-none"}`}
       >
         {/* Thông tin cơ bản */}
@@ -81,7 +78,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           <div className="grid grid-cols-2 gap-4">
             <Form.Item label="Họ và tên" name="fullName"><Input /></Form.Item>
             <Form.Item label="Giới tính" name="gender"><Input /></Form.Item>
-            {/* <Form.Item label="Ngày sinh" name="dateOfBirth"><DatePicker className="w-full" /></Form.Item> */}
+            <Form.Item label="Ngày sinh" name="dateOfBirth"><DatePicker className="w-full" /></Form.Item>
             <Form.Item label="Nơi sinh" name="placeOfBirth"><Input /></Form.Item>
             <Form.Item label="Dân tộc" name="ethnicityName"><Input /></Form.Item>
             <Form.Item label="Tôn giáo" name="religion"><Input /></Form.Item>
@@ -93,8 +90,8 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           <h3 className="font-semibold text-lg border-b pb-1 mb-3">Giấy tờ tùy thân</h3>
           <div className="grid grid-cols-2 gap-4">
             <Form.Item label="Số CMND/CCCD" name="idNumber"><Input /></Form.Item>
-            {/* <Form.Item label="Ngày cấp" name="idIssueDate"><DatePicker className="w-full" /></Form.Item>
-            <Form.Item label="Nơi cấp" name="idIssuePlace"><Input /></Form.Item> */}
+            <Form.Item label="Ngày cấp" name="idIssueDate"><DatePicker className="w-full" /></Form.Item>
+            <Form.Item label="Nơi cấp" name="idIssuePlace"><Input /></Form.Item>
           </div>
         </div>
 
