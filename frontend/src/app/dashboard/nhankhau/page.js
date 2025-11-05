@@ -82,6 +82,10 @@ export default function NhanKhauPage() {
     },
   ];
 
+  const updatePersonData = async (values) => {
+    await personAPI.updateOne(values);
+  }
+
   return (
     <div>
       <div
@@ -121,7 +125,7 @@ export default function NhanKhauPage() {
         open={isOpen}
         onClose={() => setIsOpen(false)}
         person={personData[currentPerson] || {}}
-        onSubmit={(values) => console.log("Cập nhật:", values)}
+        onSubmit={updatePersonData}
       />
     </div>
   );
