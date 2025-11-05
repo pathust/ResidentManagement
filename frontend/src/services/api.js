@@ -66,4 +66,50 @@ export const personAPI = {
 
     return data;
   },
+  updateOne: async (values) => {
+    const response = await fetch(`/api/persons/${values?.id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      body: JSON.stringify(values)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update persons');
+    }
+
+    const data = await response.json();
+
+    return data;
+  },
+
+  addOne: async (values) => {
+    const response = await fetch(`/api/persons/${values?.id}`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify(values)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to add new persons');
+    }
+
+    const data = await response.json();
+
+    return data;
+  },
+
+  addOne: async (values) => {
+    const response = await fetch(`/api/persons/${values?.id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to add new persons');
+    }
+
+    const data = await response.json();
+
+    return data;
+  }
 };
