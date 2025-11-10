@@ -70,15 +70,18 @@ export const personAPI = {
     const response = await fetch(`/api/persons/${values?.id}`, {
       method: 'PUT',
       credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(values)
     });
-
+  
     if (!response.ok) {
-      throw new Error('Failed to update persons');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to update person');
     }
-
+  
     const data = await response.json();
-
     return data;
   },
 

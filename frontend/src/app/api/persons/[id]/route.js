@@ -46,21 +46,13 @@ export async function GET(req, { params }) {
 export async function PUT(req, { params }) {
     const SERVER_URL = process.env.SERVER_URL || "http://localhost:8080";
 
-
     if (!req.cookies.get("access_token")) {
         return NextResponse.json({ error: "No access token found" }, { status: 401 });
     }
 
     const token = req.cookies.get("access_token")?.value || "";
-
-    if (!req.cookies.get("permissions")) {
-        return NextResponse.json({ error: "No permissions found" }, { status: 401 });
-    }
-
-    const permissions = req.cookies.get("permissions")?.value || "";
-
     const { id } = params;
-    const updateData = req.body;
+    const updateData = await req.json();
 
     try {
         const response = await fetch(`${SERVER_URL}/api/persons/${id}`, {
@@ -74,11 +66,12 @@ export async function PUT(req, { params }) {
 
         if (!response.ok) {
             const errorData = await response.json();
-            return NextResponse.json({ error: errorData.detail || "Failed to update" }, { status: response.status });
+            return NextResponse.json({ error: errorData.message || "Failed to update" }, { status: response.status });
         }
 
-        return NextResponse.status(200);
-    }	catch (error) {
+        const data = await response.json();
+        return NextResponse.json(data);
+    } catch (error) {
         console.error("Error during fetch:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }

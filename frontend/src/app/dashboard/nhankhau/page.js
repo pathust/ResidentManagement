@@ -83,8 +83,17 @@ export default function NhanKhauPage() {
   ];
 
   const updatePersonData = async (values) => {
-    await personAPI.updateOne(values);
-  }
+    try {
+      await personAPI.updateOne(values);
+      
+      // ✅ Cập nhật lại danh sách sau khi sửa thành công
+      const updatedData = await personAPI.getAll();
+      setPersonData(updatedData);
+      
+    } catch (error) {
+      throw new Error(error.message || "Không thể cập nhật thông tin");
+    }
+  };
 
   return (
     <div>

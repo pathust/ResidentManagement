@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Form, Input, DatePicker } from "antd";
+import { Modal, Button, Form, Input, DatePicker, message } from "antd";
 import dayjs from "dayjs";
 
 const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
@@ -14,49 +14,80 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
 
   const handleCancelEdit = () => {
     setEditing(false);
-    form.setFieldsValue(person);
+    
+    // ✅ Reset form về giá trị ban đầu
+    if (person) {
+      const formData = {
+        ...person,
+        idIssueDate: person.idIssueDate && dayjs(person.idIssueDate).isValid()
+          ? dayjs(person.idIssueDate)
+          : null,
+        dateOfBirth: person.dateOfBirth && dayjs(person.dateOfBirth).isValid()
+          ? dayjs(person.dateOfBirth)
+          : null,
+      };
+      form.setFieldsValue(formData);
+    }
   };
 
   const handleSubmit = async () => {
     try {
-      const values = await form.validateFields();
-      values.idIssueDate = values.idIssueDate?.format("YYYY-MM-DD");
-      values.dateOfBirth = values.dateOfBirth?.format("YYYY-MM-DD");
+      const formValues = await form.validateFields();
+      
+      formValues.idIssueDate = formValues.idIssueDate?.format("YYYY-MM-DD");
+      formValues.dateOfBirth = formValues.dateOfBirth?.format("YYYY-MM-DD");
 
-      if (onSubmit) await onSubmit(values);
+      // ✅ Merge với person gốc
+      const completeData = {
+        ...person,
+        ...formValues,
+      };
+
+      if (onSubmit) {
+        await onSubmit(completeData);
+        message.success("Cập nhật thông tin thành công!");
+        setEditing(false);
+        onClose();
+      }
     } catch (error) {
+      if (error.errorFields) {
+        message.error("Vui lòng kiểm tra lại thông tin!");
+      } else {
+        message.error(error.message || "Cập nhật thất bại!");
+      }
       console.log("Validation failed:", error);
-    } finally {
-      setEditing(false);
-      form.setFieldsValue(person);
     }
   };
 
+  // ✅ Không mutate person gốc
   useEffect(() => {
-    const reselectHandler = () => {
-      person.idIssueDate = person.idIssueDate && dayjs(person.idIssueDate).isValid()
+    if (!person) return;
+
+    const formData = {
+      ...person,
+      idIssueDate: person.idIssueDate && dayjs(person.idIssueDate).isValid()
         ? dayjs(person.idIssueDate)
-        : null;
-        
-      person.dateOfBirth = person.dateOfBirth && dayjs(person.dateOfBirth).isValid()
+        : null,
+      dateOfBirth: person.dateOfBirth && dayjs(person.dateOfBirth).isValid()
         ? dayjs(person.dateOfBirth)
-        : null;
+        : null,
+    };
 
-      form.setFieldsValue(person);
-    }
-
-    reselectHandler();
-  }, [person])
+    form.setFieldsValue(formData);
+  }, [person, form]);
 
   return (
     <Modal
       title="Thông tin cá nhân"
       open={open}
-      onCancel={onClose}
+      onCancel={() => {
+        handleCancelEdit();
+        onClose();
+      }}
       footer={null}
       width={800}
       centered={true}
-      destroyOnHidden={true}
+      destroyOnClose={true}
       maskClosable={false}
       styles={{
         body: {
@@ -69,8 +100,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
       <Form
         form={form}
         layout="vertical"
-        // disabled={!editing}
-        className={`space-y-6 ${editing?"":"pointer-events-none"}`}
+        className={`space-y-6 ${editing ? "" : "pointer-events-none"}`}
       >
         {/* Thông tin cơ bản */}
         <div>
@@ -131,7 +161,6 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
         </div>
       </Form>
 
-      {/* Footer cố định */}
       <div className="flex justify-end gap-3 mt-6 pt-3 border-t sticky bottom-0 bg-white z-10">
         {!editing ? (
           <Button type="primary" onClick={handleEdit}>
