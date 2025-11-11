@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Table, Space, Typography, Tag } from "antd";
+import { Button, Table, Space, Typography, Tag, message } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
@@ -11,27 +11,47 @@ import {
 
 import { personAPI } from "@/services/api";
 import PersonDetailModal from "@/components/PersonDetailModal";
+import PersonAddModal from "@/components/PersonAddModal";  // ← Import mới
 
 const { Title } = Typography;
 
 export default function NhanKhauPage() {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isDetailOpen, setIsDetailOpen] = React.useState(false);
+  const [isAddOpen, setIsAddOpen] = React.useState(false);  // ← State mới
   const [currentPerson, setCurrentPerson] = React.useState(0);
-
   const [personData, setPersonData] = React.useState([]);
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await personAPI.getAll();
-        setPersonData(data);
-      }
-      catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
 
+  React.useEffect(() => {
     fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const data = await personAPI.getAll();
+      setPersonData(data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      message.error("Không thể tải dữ liệu");
+    }
+  };
+
+  const handleAddPerson = async (values) => {
+    try {
+      await personAPI.addOne(values);
+      await fetchData();  // Refresh data
+    } catch (error) {
+      throw new Error(error.message || "Không thể thêm nhân khẩu");
+    }
+  };
+
+  const updatePersonData = async (values) => {
+    try {
+      await personAPI.updateOne(values);
+      await fetchData();
+    } catch (error) {
+      throw new Error(error.message || "Không thể cập nhật thông tin");
+    }
+  };
 
   const columns = [
     {
@@ -72,7 +92,7 @@ export default function NhanKhauPage() {
             size="small"
             onClick={() => {
               setCurrentPerson(index);
-              setIsOpen(true);
+              setIsDetailOpen(true);
             }}
           >
             Xem
@@ -81,19 +101,6 @@ export default function NhanKhauPage() {
       ),
     },
   ];
-
-  const updatePersonData = async (values) => {
-    try {
-      await personAPI.updateOne(values);
-      
-      // ✅ Cập nhật lại danh sách sau khi sửa thành công
-      const updatedData = await personAPI.getAll();
-      setPersonData(updatedData);
-      
-    } catch (error) {
-      throw new Error(error.message || "Không thể cập nhật thông tin");
-    }
-  };
 
   return (
     <div>
@@ -109,7 +116,11 @@ export default function NhanKhauPage() {
           Danh sách Nhân khẩu
         </Title>
         <Space>
-          <Button icon={<PlusOutlined />} type="primary">
+          <Button 
+            icon={<PlusOutlined />} 
+            type="primary"
+            onClick={() => setIsAddOpen(true)}
+          >
             Thêm nhân khẩu
           </Button>
           <Button icon={<EditOutlined />}>Sửa thông tin</Button>
@@ -130,11 +141,19 @@ export default function NhanKhauPage() {
         }}
       />
       
+      {/* Modal xem/sửa */}
       <PersonDetailModal
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
+        open={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
         person={personData[currentPerson] || {}}
         onSubmit={updatePersonData}
+      />
+
+      {/* ✅ Modal thêm mới */}
+      <PersonAddModal
+        open={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        onSubmit={handleAddPerson}
       />
     </div>
   );

@@ -86,33 +86,33 @@ export const personAPI = {
   },
 
   addOne: async (values) => {
-    const response = await fetch(`/api/persons/${values?.id}`, {
+    const response = await fetch(`/api/persons`, {
       method: 'POST',
       credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(values)
     });
 
     if (!response.ok) {
-      throw new Error('Failed to add new persons');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to add new person');
     }
 
-    const data = await response.json();
-
-    return data;
+    return response.json();
   },
 
-  addOne: async (values) => {
-    const response = await fetch(`/api/persons/${values?.id}`, {
+  deleteOne: async (id) => {
+    const response = await fetch(`/api/persons/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     });
 
     if (!response.ok) {
-      throw new Error('Failed to add new persons');
+      throw new Error('Failed to delete person');
     }
 
-    const data = await response.json();
-
-    return data;
-  }
+    return response.status === 204;
+  },
 };

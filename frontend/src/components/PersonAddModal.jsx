@@ -1,98 +1,53 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Modal, Button, Form, Input, DatePicker, Select, message } from "antd";
-import dayjs from "dayjs";
+import React from "react";
+import { Modal, Form, Input, DatePicker, Select, message } from "antd";
 
-const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
+const PersonAddModal = ({ open, onClose, onSubmit }) => {
   const [form] = Form.useForm();
-  const [editing, setEditing] = useState(false);
-
-  const handleEdit = () => {
-    setEditing(true);
-  };
-
-  const handleCancelEdit = () => {
-    setEditing(false);
-
-    // Reset form về giá trị ban đầu
-    if (person) {
-      const formData = {
-        ...person,
-        idIssueDate:
-          person.idIssueDate && dayjs(person.idIssueDate).isValid()
-            ? dayjs(person.idIssueDate)
-            : null,
-        dateOfBirth:
-          person.dateOfBirth && dayjs(person.dateOfBirth).isValid()
-            ? dayjs(person.dateOfBirth)
-            : null,
-      };
-      form.setFieldsValue(formData);
-    }
-  };
+  const [loading, setLoading] = React.useState(false);
 
   const handleSubmit = async () => {
     try {
-      const formValues = await form.validateFields();
-
+      const values = await form.validateFields();
+      
       // Format dates
-      if (formValues.idIssueDate) {
-        formValues.idIssueDate = formValues.idIssueDate.format("YYYY-MM-DD");
+      if (values.idIssueDate) {
+        values.idIssueDate = values.idIssueDate.format("YYYY-MM-DD");
       }
-      if (formValues.dateOfBirth) {
-        formValues.dateOfBirth = formValues.dateOfBirth.format("YYYY-MM-DD");
+      if (values.dateOfBirth) {
+        values.dateOfBirth = values.dateOfBirth.format("YYYY-MM-DD");
       }
 
-      // Merge với person gốc
-      const completeData = {
-        ...person,
-        ...formValues,
-      };
-
-      if (onSubmit) {
-        await onSubmit(completeData);
-        message.success("Cập nhật thông tin thành công!");
-        setEditing(false);
-        onClose();
-      }
+      setLoading(true);
+      await onSubmit(values);
+      
+      message.success("Thêm nhân khẩu thành công!");
+      form.resetFields();
+      onClose();
     } catch (error) {
       if (error.errorFields) {
         message.error("Vui lòng kiểm tra lại thông tin!");
       } else {
-        message.error(error.message || "Cập nhật thất bại!");
+        message.error(error.message || "Thêm mới thất bại!");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Load data khi person thay đổi
-  useEffect(() => {
-    if (!person) return;
-
-    const formData = {
-      ...person,
-      idIssueDate:
-        person.idIssueDate && dayjs(person.idIssueDate).isValid()
-          ? dayjs(person.idIssueDate)
-          : null,
-      dateOfBirth:
-        person.dateOfBirth && dayjs(person.dateOfBirth).isValid()
-          ? dayjs(person.dateOfBirth)
-          : null,
-    };
-
-    form.setFieldsValue(formData);
-  }, [person, form]);
-
   return (
     <Modal
-      title="Thông tin cá nhân"
+      title="Thêm nhân khẩu mới"
       open={open}
       onCancel={() => {
-        handleCancelEdit();
+        form.resetFields();
         onClose();
       }}
-      footer={null}
+      onOk={handleSubmit}
+      okText="Thêm"
+      cancelText="Hủy"
+      confirmLoading={loading}
       width={800}
       centered
       destroyOnClose
@@ -105,11 +60,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
         },
       }}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        className={`space-y-6 ${editing ? "" : "pointer-events-none"}`}
-      >
+      <Form form={form} layout="vertical" className="space-y-6">
         {/* Thông tin cơ bản */}
         <div>
           <h3 className="font-semibold text-lg border-b pb-1 mb-3">
@@ -266,6 +217,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
             <Form.Item
               label="Trạng thái"
               name="status"
+              initialValue="ALIVE"
               rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
             >
               <Select>
@@ -280,24 +232,8 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           </div>
         </div>
       </Form>
-
-      {/* Footer buttons */}
-      <div className="flex justify-end gap-3 mt-6 pt-3 border-t sticky bottom-0 bg-white z-10">
-        {!editing ? (
-          <Button type="primary" onClick={handleEdit}>
-            Chỉnh sửa
-          </Button>
-        ) : (
-          <>
-            <Button onClick={handleCancelEdit}>Hủy</Button>
-            <Button type="primary" onClick={handleSubmit}>
-              Xác nhận
-            </Button>
-          </>
-        )}
-      </div>
     </Modal>
   );
 };
 
-export default PersonDetailModal;
+export default PersonAddModal;
