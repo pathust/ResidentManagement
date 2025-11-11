@@ -2,6 +2,7 @@ package com.soict.repository.household.event;
 
 import com.soict.entity.household.event.HouseholdAddressChange;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,11 +12,11 @@ import java.util.List;
 
 // ========== HOUSEHOLD ADDRESS CHANGE REPOSITORY ==========
 @Repository
-public interface HouseholdAddressChangeRepository extends JpaRepository<HouseholdAddressChange, Integer> {
+public interface HouseholdAddressChangeRepository extends JpaRepository<HouseholdAddressChange, Integer>, JpaSpecificationExecutor<HouseholdAddressChange> {
 
     List<HouseholdAddressChange> findByHouseholdIdOrderByChangeDateDesc(Integer householdId);
 
-    @Query("SELECT hac FROM HouseholdAddressChange hac WHERE hac.toAddressWardId = :wardId " +
+    @Query("SELECT hac FROM HouseholdAddressChange hac WHERE hac.toAddressWard.id = :wardId " +
             "OR hac.fromAddressWard.id = :wardId ORDER BY hac.changeDate DESC")
     List<HouseholdAddressChange> findByWardId(@Param("wardId") Integer wardId);
 
@@ -25,7 +26,7 @@ public interface HouseholdAddressChangeRepository extends JpaRepository<Househol
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    @Query("SELECT COUNT(hac) FROM HouseholdAddressChange hac WHERE hac.toAddressWardId = :wardId " +
+    @Query("SELECT COUNT(hac) FROM HouseholdAddressChange hac WHERE hac.toAddressWard.id = :wardId " +
             "AND YEAR(hac.changeDate) = :year")
     Long countMovingInByWardAndYear(@Param("wardId") Integer wardId, @Param("year") Integer year);
 
