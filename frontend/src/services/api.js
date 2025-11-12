@@ -52,18 +52,67 @@ export const householdAPI = {
 };
 
 export const personAPI = {
-  getAll: async (token) => {
+  getAll: async () => {
     const response = await fetch('/api/persons', {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      credentials: 'include',
     });
 
     if (!response.ok) {
       throw new Error('Failed to fetch persons');
     }
 
+    const data = await response.json();
+
+    return data;
+  },
+  updateOne: async (values) => {
+    const response = await fetch(`/api/persons/${values?.id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(values)
+    });
+  
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to update person');
+    }
+  
+    const data = await response.json();
+    return data;
+  },
+
+  addOne: async (values) => {
+    const response = await fetch(`/api/persons`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(values)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to add new person');
+    }
+
     return response.json();
+  },
+
+  deleteOne: async (id) => {
+    const response = await fetch(`/api/persons/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete person');
+    }
+
+    return response.status === 204;
   },
 };

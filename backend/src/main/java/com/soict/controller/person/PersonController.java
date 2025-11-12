@@ -1,5 +1,5 @@
 
-package com.soict.controller;
+package com.soict.controller.person;
 
 import com.soict.dto.person.*;
 import com.soict.service.PersonService;

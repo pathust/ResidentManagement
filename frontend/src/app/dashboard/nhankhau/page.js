@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Table, Space, Typography, Tag } from "antd";
+import { Button, Table, Space, Typography, Tag, message } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
@@ -9,32 +9,67 @@ import {
   CloseCircleOutlined,
 } from "@ant-design/icons";
 
+import { personAPI } from "@/services/api";
+import PersonDetailModal from "@/components/PersonDetailModal";
+import PersonAddModal from "@/components/PersonAddModal";  // ← Import mới
+
 const { Title } = Typography;
 
 export default function NhanKhauPage() {
+  const [isDetailOpen, setIsDetailOpen] = React.useState(false);
+  const [isAddOpen, setIsAddOpen] = React.useState(false);  // ← State mới
+  const [currentPerson, setCurrentPerson] = React.useState(0);
+  const [personData, setPersonData] = React.useState([]);
+
+  React.useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const data = await personAPI.getAll();
+      setPersonData(data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      message.error("Không thể tải dữ liệu");
+    }
+  };
+
+  const handleAddPerson = async (values) => {
+    try {
+      await personAPI.addOne(values);
+      await fetchData();  // Refresh data
+    } catch (error) {
+      throw new Error(error.message || "Không thể thêm nhân khẩu");
+    }
+  };
+
+  const updatePersonData = async (values) => {
+    try {
+      await personAPI.updateOne(values);
+      await fetchData();
+    } catch (error) {
+      throw new Error(error.message || "Không thể cập nhật thông tin");
+    }
+  };
+
   const columns = [
     {
       title: "Họ và tên",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "fullName",
+      key: "fullName",
     },
     {
       title: "Ngày sinh",
-      dataIndex: "dob",
-      key: "dob",
+      dataIndex: "dateOfBirth",
+      key: "dateOfBirth",
       width: 120,
     },
     {
       title: "CMND/CCCD",
-      dataIndex: "idCard",
-      key: "idCard",
+      dataIndex: "idNumber",
+      key: "idNumber",
       width: 140,
-    },
-    {
-      title: "Quan hệ với chủ hộ",
-      dataIndex: "relation",
-      key: "relation",
-      width: 150,
     },
     {
       title: "Trạng thái",
@@ -42,7 +77,7 @@ export default function NhanKhauPage() {
       key: "status",
       width: 120,
       render: (status) => {
-        const color = status === "Đang sinh sống" ? "green" : "orange";
+        const color = status === "ALIVE" ? "green" : "orange";
         return <Tag color={color}>{status}</Tag>;
       },
     },
@@ -50,43 +85,20 @@ export default function NhanKhauPage() {
       title: "Thao tác",
       key: "action",
       width: 150,
-      render: () => (
+      render: (_, record, index) => (
         <Space>
-          <Button type="link" size="small">
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setCurrentPerson(index);
+              setIsDetailOpen(true);
+            }}
+          >
             Xem
-          </Button>
-          <Button type="link" size="small">
-            Sửa
           </Button>
         </Space>
       ),
-    },
-  ];
-
-  const data = [
-    {
-      key: "1",
-      name: "Nguyễn Văn A",
-      dob: "15/03/1985",
-      idCard: "001085012345",
-      relation: "Chủ hộ",
-      status: "Đang sinh sống",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      dob: "20/07/1987",
-      idCard: "001087054321",
-      relation: "Vợ",
-      status: "Đang sinh sống",
-    },
-    {
-      key: "3",
-      name: "Nguyễn Văn C",
-      dob: "10/11/2010",
-      idCard: "001010067890",
-      relation: "Con",
-      status: "Đang sinh sống",
     },
   ];
 
@@ -104,7 +116,11 @@ export default function NhanKhauPage() {
           Danh sách Nhân khẩu
         </Title>
         <Space>
-          <Button icon={<PlusOutlined />} type="primary">
+          <Button 
+            icon={<PlusOutlined />} 
+            type="primary"
+            onClick={() => setIsAddOpen(true)}
+          >
             Thêm nhân khẩu
           </Button>
           <Button icon={<EditOutlined />}>Sửa thông tin</Button>
@@ -117,12 +133,27 @@ export default function NhanKhauPage() {
 
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={personData}
         pagination={{
           pageSize: 10,
           showSizeChanger: true,
           showTotal: (total) => `Tổng ${total} nhân khẩu`,
         }}
+      />
+      
+      {/* Modal xem/sửa */}
+      <PersonDetailModal
+        open={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        person={personData[currentPerson] || {}}
+        onSubmit={updatePersonData}
+      />
+
+      {/* ✅ Modal thêm mới */}
+      <PersonAddModal
+        open={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        onSubmit={handleAddPerson}
       />
     </div>
   );
