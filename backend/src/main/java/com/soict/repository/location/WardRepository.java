@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface WardRepository extends JpaRepository<Ward, Integer> {
-    List<Ward> findByNameContainingIgnoreCase(String name);
+    List<Ward> findByProvinceId(Integer provinceId);
+    boolean existsProvinceById(Integer id);
 }
