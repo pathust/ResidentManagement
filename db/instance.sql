@@ -7,9 +7,136 @@ USE RESIDENT_MANAGEMENT_DB;
 -- I. DỮ LIỆU NỀN TẢNG (Địa lý & Dân tộc) - **ĐƯA LÊN ĐẦU**
 -- -----------------------------------------------------------------
 
-INSERT INTO province (name) VALUES ('Ho Chi Minh City'), ('Ha Noi');
-INSERT INTO ward (name, province_id) VALUES ('Ward 1', 1), ('Ward 2', 1);
-INSERT INTO ethnicity (name) VALUES ('Kinh'), ('Hoa'), ('Tay');
+-- ------------------------------------------------------------
+-- BỔ SUNG PROVINCE
+-- ------------------------------------------------------------
+INSERT INTO province (name) VALUES
+    ('TP Hồ Chí Minh'),
+    ('Hà Nội'),
+    ('Đà Nẵng'),
+    ('Hải Phòng'),
+    ('Cần Thơ'),
+    ('Quảng Ninh'),
+    ('Bà Rịa - Vũng Tàu'),
+    ('Thanh Hóa'),
+    ('Nghệ An'),
+    ('Huế'),
+    ('Khánh Hòa'),
+    ('Bình Dương'),
+    ('Đồng Nai'),
+    ('Long An'),
+    ('An Giang'),
+    ('Kiên Giang'),
+    ('Lâm Đồng'),
+    ('Đắk Lắk'),
+    ('Quảng Nam'),
+    ('Quảng Bình');
+
+-- ------------------------------------------------------------
+-- BỔ SUNG WARD (mỗi tỉnh thêm 1–2 ward)
+-- ------------------------------------------------------------
+INSERT INTO ward (name, province_id) VALUES
+    -- TP Hồ Chí Minh (1)
+    ('Quận 1', 1),
+    ('Bình Thạnh', 1),
+
+    -- Hà Nội (2)
+    ('Ba Đình', 2),
+    ('Hoàn Kiếm', 2),
+
+    -- Đà Nẵng (3)
+    ('Hải Châu', 3),
+    ('Thanh Khê', 3),
+
+    -- Hải Phòng (4)
+    ('Hồng Bàng', 4),
+    ('Ngô Quyền', 4),
+
+    -- Cần Thơ (5)
+    ('Ninh Kiều', 5),
+    ('Bình Thủy', 5),
+
+    -- Quảng Ninh (6)
+    ('Hạ Long', 6),
+    ('Cẩm Phả', 6),
+
+    -- Bà Rịa - Vũng Tàu (7)
+    ('Vũng Tàu', 7),
+    ('Bà Rịa', 7),
+
+    -- Thanh Hóa (8)
+    ('TP Thanh Hóa', 8),
+    ('Sầm Sơn', 8),
+
+    -- Nghệ An (9)
+    ('TP Vinh', 9),
+    ('Cửa Lò', 9),
+
+    -- Huế (10)
+    ('Phú Hội', 10),
+    ('Thuận Hòa', 10),
+
+    -- Khánh Hòa (11)
+    ('Nha Trang', 11),
+    ('Cam Ranh', 11),
+
+    -- Bình Dương (12)
+    ('Thủ Dầu Một', 12),
+    ('Dĩ An', 12),
+
+    -- Đồng Nai (13)
+    ('Biên Hòa', 13),
+    ('Long Khánh', 13),
+
+    -- Long An (14)
+    ('Tân An', 14),
+    ('Bến Lức', 14),
+
+    -- An Giang (15)
+    ('Long Xuyên', 15),
+    ('Châu Đốc', 15),
+
+    -- Kiên Giang (16)
+    ('Rạch Giá', 16),
+    ('Hà Tiên', 16),
+
+    -- Lâm Đồng (17)
+    ('Đà Lạt', 17),
+    ('Bảo Lộc', 17),
+
+    -- Đắk Lắk (18)
+    ('Buôn Ma Thuột', 18),
+    ('Ea Kar', 18),
+
+    -- Quảng Nam (19)
+    ('Tam Kỳ', 19),
+    ('Hội An', 19),
+
+    -- Quảng Bình (20)
+    ('Đồng Hới', 20),
+    ('Ba Đồn', 20);
+
+-- ------------------------------------------------------------
+-- BỔ SUNG ETHNICITY (thêm vài dân tộc phổ biến, không quá nhiều)
+-- ------------------------------------------------------------
+INSERT INTO ethnicity (name) VALUES
+    ('Kinh'),
+    ('Tày'),
+    ('Thái'),
+    ('Hoa'),
+    ('Khơ-me'),
+    ('Mường'),
+    ('Nùng'),
+    ('H\'Mông'),
+    ('Dao'),
+    ('Gia Rai'),
+    ('Ê Đê'),
+    ('Ba Na'),
+    ('Chăm'),
+    ('Sán Dìu'),
+    ('Cơ Tu');
+
+
 
 -- -----------------------------------------------------------------
 -- II. DỮ LIỆU NGƯỜI DÙNG & QUYỀN
