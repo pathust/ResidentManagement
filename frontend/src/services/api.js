@@ -116,3 +116,32 @@ export const personAPI = {
     return response.status === 204;
   },
 };
+
+export const locationAPI = {
+  getAllProvinces: async () => {
+    const response = await fetch('/api/location/provinces', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch provinces');
+    return response.json();
+  },
+  
+  getWardsByProvince: async (provinceId) => {
+    const response = await fetch(`/api/location/wards?provinceId=${provinceId}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch wards');
+    return response.json();
+  },
+
+  getAllEthnicities: async () => {
+    const response = await fetch('/api/location/ethnicities', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch ethnicities');
+    return response.json();
+  }
+};
