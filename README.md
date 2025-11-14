@@ -64,8 +64,16 @@ npm install
 # Copy environment file
 cp .env.example .env
 
+# For development
 # Start development server
 npm run dev
+
+# For production
+# Bundle and optimize the application for production
+npm run build
+
+# Start the production server
+npm run start
 
 ```
 The frontend will start at `http://localhost:3000`
