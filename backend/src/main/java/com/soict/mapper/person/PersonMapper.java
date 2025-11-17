@@ -1,4 +1,4 @@
-package com.soict.mapper;
+package com.soict.mapper.person;
 
 import com.soict.dto.person.*;
 import com.soict.entity.person.*;
