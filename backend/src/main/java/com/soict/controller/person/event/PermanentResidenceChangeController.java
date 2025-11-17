@@ -48,7 +48,7 @@ public class PermanentResidenceChangeController {
         return ResponseEntity.ok(personService.getPermanentResidenceChangeById(id));
     }
 
-    @Operation(summary = "Get permanent residence changes (paginated & filterable)")
+    @Operation(summary = "Get permanent residence changes (paginated)")
     @GetMapping("/page")
     public ResponseEntity<Page<PermanentResidenceChangeDTO>> getPage(
             @Parameter(description = "Pagination parameters") Pageable pageable,
@@ -68,7 +68,7 @@ public class PermanentResidenceChangeController {
         );
     }
 
-    @Operation(summary = "Get all permanent residence changes (sorted by startDate desc)")
+    @Operation(summary = "Get all permanent residence changes")
     @GetMapping("/all")
     public ResponseEntity<List<PermanentResidenceChangeDTO>> getAll() {
         return ResponseEntity.ok(personService.getAllPermanentResidenceChanges());

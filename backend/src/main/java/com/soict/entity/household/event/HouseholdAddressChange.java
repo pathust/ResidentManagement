@@ -31,8 +31,9 @@ public class HouseholdAddressChange {
     @Column(name = "from_address_details")
     private String fromAddressDetails;
 
-    @Column(name = "to_address_ward_id", nullable = false)
-    private Integer toAddressWardId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_address_ward_id", nullable = false)
+    private Ward toAddressWard;
 
     @Column(name = "to_address_details")
     private String toAddressDetails;

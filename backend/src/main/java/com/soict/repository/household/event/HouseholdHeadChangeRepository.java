@@ -1,7 +1,9 @@
 package com.soict.repository.household.event;
 
+import com.soict.entity.household.event.HouseholdAddressChange;
 import com.soict.entity.household.event.HouseholdHeadChange;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -10,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface HouseholdHeadChangeRepository extends JpaRepository<HouseholdHeadChange, Integer> {
+public interface HouseholdHeadChangeRepository extends JpaRepository<HouseholdHeadChange, Integer>, JpaSpecificationExecutor<HouseholdHeadChange> {
 
     List<HouseholdHeadChange> findByHouseholdIdOrderByChangeDateDesc(Integer householdId);
 

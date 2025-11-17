@@ -47,7 +47,7 @@ public class TemporaryAbsenceController {
         return ResponseEntity.ok(personService.getTemporaryAbsenceById(id));
     }
 
-    @Operation(summary = "Get all temporary absences (list, sorted by startDate DESC)")
+    @Operation(summary = "Get all temporary absences")
     @GetMapping("/all")
     public ResponseEntity<List<TemporaryAbsenceDTO>> getAll() {
         return ResponseEntity.ok(personService.getAllTemporaryAbsences());
