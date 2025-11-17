@@ -181,16 +181,17 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
         formValues.dateOfBirth = formValues.dateOfBirth.format("YYYY-MM-DD");
       }
   
-      // Remove province fields (chỉ cần wardId)
+      // Remove province fields và các field chỉ dùng để hiển thị
       delete formValues.placeOfOriginProvinceId;
       delete formValues.permAddressProvinceId;
       delete formValues.tempAddressProvinceId;
-  
-      // ✅ THÊM DÒNG NÀY (sau delete provinces, trước merge):
       delete formValues.ethnicityName;
       delete formValues.placeOfOriginWardName;
+      delete formValues.placeOfOriginProvinceName;
       delete formValues.permAddressWardName;
+      delete formValues.permAddressProvinceName;
       delete formValues.tempAddressWardName;
+      delete formValues.tempAddressProvinceName;
       delete formValues.currentHouseholdCode;
   
       // Merge với person gốc
@@ -247,7 +248,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
       <Form
         form={form}
         layout="vertical"
-        className={`space-y-6 ${editing ? "" : "pointer-events-none"}`}
+        className="space-y-6"
       >
         {/* Thông tin cơ bản */}
         <div>
@@ -260,7 +261,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
               name="fullName"
               rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
             >
-              <Input placeholder="Nguyễn Văn A" />
+              <Input placeholder="Nguyễn Văn A" disabled={!editing} />
             </Form.Item>
 
             <Form.Item
@@ -268,7 +269,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
               name="gender"
               rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
             >
-              <Select placeholder="Chọn giới tính">
+              <Select placeholder="Chọn giới tính" disabled={!editing}>
                 <Select.Option value="M">Nam</Select.Option>
                 <Select.Option value="F">Nữ</Select.Option>
                 <Select.Option value="X">Khác</Select.Option>
@@ -283,12 +284,13 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
               <DatePicker 
                 className="w-full" 
                 format="DD/MM/YYYY" 
-                placeholder="Chọn ngày sinh" 
+                placeholder="Chọn ngày sinh"
+                disabled={!editing}
               />
             </Form.Item>
 
             <Form.Item label="Nơi sinh" name="placeOfBirth">
-              <Input placeholder="Hà Nội" />
+              <Input placeholder="Hà Nội" disabled={!editing} />
             </Form.Item>
 
             <Form.Item 
@@ -299,6 +301,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
               <Select 
                 placeholder="Chọn dân tộc"
                 showSearch
+                disabled={!editing}
                 filterOption={(input, option) =>
                   option.children.toLowerCase().includes(input.toLowerCase())
                 }
@@ -312,7 +315,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
             </Form.Item>
 
             <Form.Item label="Tôn giáo" name="religion">
-              <Input placeholder="Không" />
+              <Input placeholder="Không" disabled={!editing} />
             </Form.Item>
           </div>
         </div>
@@ -324,19 +327,20 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <Form.Item label="Số CMND/CCCD" name="idNumber">
-              <Input placeholder="001234567890" />
+              <Input placeholder="001234567890" disabled={!editing} />
             </Form.Item>
 
             <Form.Item label="Ngày cấp" name="idIssueDate">
               <DatePicker 
                 className="w-full" 
                 format="DD/MM/YYYY" 
-                placeholder="Chọn ngày cấp" 
+                placeholder="Chọn ngày cấp"
+                disabled={!editing}
               />
             </Form.Item>
 
             <Form.Item label="Nơi cấp" name="idIssuePlace">
-              <Input placeholder="Công an TP Hà Nội" />
+              <Input placeholder="Công an TP Hà Nội" disabled={!editing} />
             </Form.Item>
           </div>
         </div>
@@ -348,155 +352,248 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           {/* Quê quán */}
           <div className="mb-4">
             <p className="text-sm font-medium mb-2">Quê quán</p>
-            <div className="grid grid-cols-3 gap-4">
-              <Form.Item 
-                label="Tỉnh/Thành phố" 
-                name="placeOfOriginProvinceId"
-              >
-                <Select
-                  placeholder="Chọn tỉnh/thành"
-                  onChange={handlePlaceOfOriginProvinceChange}
-                  showSearch
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
+            {!editing ? (
+              // Chế độ xem: Hiển thị text
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm text-gray-500">Tỉnh/Thành phố</label>
+                  <Input 
+                    disabled 
+                    value={person?.placeOfOriginProvinceName || "—"} 
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Phường/Xã</label>
+                  <Input 
+                    disabled 
+                    value={person?.placeOfOriginWardName || "—"} 
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Chi tiết địa chỉ</label>
+                  <Input 
+                    disabled 
+                    value={person?.placeOfOriginDetails || "—"} 
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            ) : (
+              // Chế độ sửa: Hiển thị Select
+              <div className="grid grid-cols-3 gap-4">
+                <Form.Item 
+                  label="Tỉnh/Thành phố" 
+                  name="placeOfOriginProvinceId"
                 >
-                  {provinces.map(prov => (
-                    <Select.Option key={prov.id} value={prov.id}>
-                      {prov.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  <Select
+                    placeholder="Chọn tỉnh/thành"
+                    onChange={handlePlaceOfOriginProvinceChange}
+                    showSearch
+                    filterOption={(input, option) =>
+                      option.children.toLowerCase().includes(input.toLowerCase())
+                    }
+                  >
+                    {provinces.map(prov => (
+                      <Select.Option key={prov.id} value={prov.id}>
+                        {prov.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-              <Form.Item 
-                label="Phường/Xã" 
-                name="placeOfOriginWardId"
-                rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
-              >
-                <Select
-                  placeholder="Chọn phường/xã"
-                  showSearch
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                  disabled={!form.getFieldValue('placeOfOriginProvinceId')}
+                <Form.Item 
+                  label="Phường/Xã" 
+                  name="placeOfOriginWardId"
+                  rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
                 >
-                  {placeOfOriginWards.map(ward => (
-                    <Select.Option key={ward.id} value={ward.id}>
-                      {ward.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  <Select
+                    placeholder="Chọn phường/xã"
+                    showSearch
+                    filterOption={(input, option) =>
+                      option.children.toLowerCase().includes(input.toLowerCase())
+                    }
+                    disabled={!form.getFieldValue('placeOfOriginProvinceId')}
+                  >
+                    {placeOfOriginWards.map(ward => (
+                      <Select.Option key={ward.id} value={ward.id}>
+                        {ward.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-              <Form.Item label="Chi tiết địa chỉ" name="placeOfOriginDetails">
-                <Input placeholder="Số nhà, đường..." />
-              </Form.Item>
-            </div>
+                <Form.Item label="Chi tiết địa chỉ" name="placeOfOriginDetails">
+                  <Input placeholder="Số nhà, đường..." />
+                </Form.Item>
+              </div>
+            )}
           </div>
 
           {/* Thường trú */}
           <div className="mb-4">
             <p className="text-sm font-medium mb-2">Địa chỉ thường trú</p>
-            <div className="grid grid-cols-3 gap-4">
-              <Form.Item 
-                label="Tỉnh/Thành phố" 
-                name="permAddressProvinceId"
-              >
-                <Select
-                  placeholder="Chọn tỉnh/thành"
-                  onChange={handlePermAddressProvinceChange}
-                  showSearch
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
+            {!editing ? (
+              // Chế độ xem: Hiển thị text
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm text-gray-500">Tỉnh/Thành phố</label>
+                  <Input 
+                    disabled 
+                    value={person?.permAddressProvinceName || "—"} 
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Phường/Xã</label>
+                  <Input 
+                    disabled 
+                    value={person?.permAddressWardName || "—"} 
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Chi tiết địa chỉ</label>
+                  <Input 
+                    disabled 
+                    value={person?.permAddressDetails || "—"} 
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            ) : (
+              // Chế độ sửa: Hiển thị Select
+              <div className="grid grid-cols-3 gap-4">
+                <Form.Item 
+                  label="Tỉnh/Thành phố" 
+                  name="permAddressProvinceId"
                 >
-                  {provinces.map(prov => (
-                    <Select.Option key={prov.id} value={prov.id}>
-                      {prov.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  <Select
+                    placeholder="Chọn tỉnh/thành"
+                    onChange={handlePermAddressProvinceChange}
+                    showSearch
+                    filterOption={(input, option) =>
+                      option.children.toLowerCase().includes(input.toLowerCase())
+                    }
+                  >
+                    {provinces.map(prov => (
+                      <Select.Option key={prov.id} value={prov.id}>
+                        {prov.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-              <Form.Item 
-                label="Phường/Xã" 
-                name="permAddressWardId"
-                rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
-              >
-                <Select
-                  placeholder="Chọn phường/xã"
-                  showSearch
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                  disabled={!form.getFieldValue('permAddressProvinceId')}
+                <Form.Item 
+                  label="Phường/Xã" 
+                  name="permAddressWardId"
+                  rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
                 >
-                  {permAddressWards.map(ward => (
-                    <Select.Option key={ward.id} value={ward.id}>
-                      {ward.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  <Select
+                    placeholder="Chọn phường/xã"
+                    showSearch
+                    filterOption={(input, option) =>
+                      option.children.toLowerCase().includes(input.toLowerCase())
+                    }
+                    disabled={!form.getFieldValue('permAddressProvinceId')}
+                  >
+                    {permAddressWards.map(ward => (
+                      <Select.Option key={ward.id} value={ward.id}>
+                        {ward.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-              <Form.Item label="Chi tiết địa chỉ" name="permAddressDetails">
-                <Input placeholder="Số nhà, đường..." />
-              </Form.Item>
-            </div>
+                <Form.Item label="Chi tiết địa chỉ" name="permAddressDetails">
+                  <Input placeholder="Số nhà, đường..." />
+                </Form.Item>
+              </div>
+            )}
           </div>
 
           {/* Tạm trú */}
           <div>
             <p className="text-sm font-medium mb-2">Địa chỉ tạm trú (không bắt buộc)</p>
-            <div className="grid grid-cols-3 gap-4">
-              <Form.Item 
-                label="Tỉnh/Thành phố" 
-                name="tempAddressProvinceId"
-              >
-                <Select
-                  placeholder="Chọn tỉnh/thành"
-                  onChange={handleTempAddressProvinceChange}
-                  showSearch
-                  allowClear
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
+            {!editing ? (
+              // Chế độ xem: Hiển thị text
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm text-gray-500">Tỉnh/Thành phố</label>
+                  <Input 
+                    disabled 
+                    value={person?.tempAddressProvinceName || "—"} 
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Phường/Xã</label>
+                  <Input 
+                    disabled 
+                    value={person?.tempAddressWardName || "—"} 
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Chi tiết địa chỉ</label>
+                  <Input 
+                    disabled 
+                    value={person?.tempAddressDetails || "—"} 
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            ) : (
+              // Chế độ sửa: Hiển thị Select
+              <div className="grid grid-cols-3 gap-4">
+                <Form.Item 
+                  label="Tỉnh/Thành phố" 
+                  name="tempAddressProvinceId"
                 >
-                  {provinces.map(prov => (
-                    <Select.Option key={prov.id} value={prov.id}>
-                      {prov.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  <Select
+                    placeholder="Chọn tỉnh/thành"
+                    onChange={handleTempAddressProvinceChange}
+                    showSearch
+                    allowClear
+                    filterOption={(input, option) =>
+                      option.children.toLowerCase().includes(input.toLowerCase())
+                    }
+                  >
+                    {provinces.map(prov => (
+                      <Select.Option key={prov.id} value={prov.id}>
+                        {prov.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-              <Form.Item 
-                label="Phường/Xã" 
-                name="tempAddressWardId"
-              >
-                <Select
-                  placeholder="Chọn phường/xã"
-                  showSearch
-                  allowClear
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                  disabled={!form.getFieldValue('tempAddressProvinceId')}
+                <Form.Item 
+                  label="Phường/Xã" 
+                  name="tempAddressWardId"
                 >
-                  {tempAddressWards.map(ward => (
-                    <Select.Option key={ward.id} value={ward.id}>
-                      {ward.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  <Select
+                    placeholder="Chọn phường/xã"
+                    showSearch
+                    allowClear
+                    filterOption={(input, option) =>
+                      option.children.toLowerCase().includes(input.toLowerCase())
+                    }
+                    disabled={!form.getFieldValue('tempAddressProvinceId')}
+                  >
+                    {tempAddressWards.map(ward => (
+                      <Select.Option key={ward.id} value={ward.id}>
+                        {ward.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-              <Form.Item label="Chi tiết địa chỉ" name="tempAddressDetails">
-                <Input placeholder="Số nhà, đường..." />
-              </Form.Item>
-            </div>
+                <Form.Item label="Chi tiết địa chỉ" name="tempAddressDetails">
+                  <Input placeholder="Số nhà, đường..." />
+                </Form.Item>
+              </div>
+            )}
           </div>
         </div>
 
@@ -507,11 +604,11 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <Form.Item label="Nghề nghiệp" name="occupation">
-              <Input placeholder="Kỹ sư" />
+              <Input placeholder="Kỹ sư" disabled={!editing} />
             </Form.Item>
 
             <Form.Item label="Nơi làm việc" name="workplace">
-              <Input placeholder="Công ty ABC" />
+              <Input placeholder="Công ty ABC" disabled={!editing} />
             </Form.Item>
 
             <Form.Item
@@ -521,7 +618,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
                 { pattern: /^[0-9]{10,15}$/, message: "Số điện thoại không hợp lệ" },
               ]}
             >
-              <Input placeholder="0123456789" />
+              <Input placeholder="0123456789" disabled={!editing} />
             </Form.Item>
 
             <Form.Item
@@ -529,7 +626,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
               name="emailAddress"
               rules={[{ type: "email", message: "Email không hợp lệ" }]}
             >
-              <Input placeholder="email@example.com" />
+              <Input placeholder="email@example.com" disabled={!editing} />
             </Form.Item>
           </div>
         </div>
@@ -543,7 +640,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
               name="status"
               rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
             >
-              <Select>
+              <Select disabled={!editing}>
                 <Select.Option value="ALIVE">Còn sống</Select.Option>
                 <Select.Option value="DEAD">Đã mất</Select.Option>
               </Select>
@@ -554,7 +651,8 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
                 rows={3} 
                 placeholder="Ghi chú thêm..." 
                 showCount 
-                maxLength={1000} 
+                maxLength={1000}
+                disabled={!editing}
               />
             </Form.Item>
           </div>

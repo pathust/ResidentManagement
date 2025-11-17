@@ -143,5 +143,14 @@ export const locationAPI = {
     });
     if (!response.ok) throw new Error('Failed to fetch ethnicities');
     return response.json();
+  },
+
+  getWardById: async (wardId) => {
+    const response = await fetch(`/api/location/wards/${wardId}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch ward');
+    return response.json();
   }
 };
