@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Handle GET requests to fetch persons data
+// Handle GET requests to fetch households data
 export async function GET(req) {
     const SERVER_URL = process.env.SERVER_URL || "http://localhost:8080";
 
@@ -19,8 +19,6 @@ export async function GET(req) {
     
     const pageSize = Number(searchParams.get("pageSize") ?? 10);
     const pageIndex = Number(searchParams.get("pageIndex") ?? 0);
-    console.log("Page Index:", pageIndex);
-    console.log("Page Size:", pageSize);
 
     if (pageIndex === null || pageIndex === undefined){
         return NextResponse.json({ error: "Invalid request: Missing paging index" }, { status: 400 });
@@ -32,11 +30,10 @@ export async function GET(req) {
             size: pageSize,
             sort: "id"
         });
-kksdafjlk
+
         const response = await fetch(`${SERVER_URL}/api/households?${params.toString()}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`,
             },
         });
@@ -47,8 +44,12 @@ kksdafjlk
         }
 
         const data = await response.json();
+
+        if (!data.content) {
+            return NextResponse.json({ error: "Invalid data format received from server" }, { status: 500 });
+        }
         
-        return NextResponse.json(data);
+        return NextResponse.json(data.content);
     }	catch (error) {
         console.error("Error during fetch:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

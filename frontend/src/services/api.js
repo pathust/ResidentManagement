@@ -39,37 +39,36 @@ export const householdAPI = {
     if (!paging) paging = {};
     const params = new URLSearchParams(paging);
 
-    console.log("Paging params:", params.toString());
+    const paramsString = params.toString() ? `?${params.toString()}` : '';
 
-    const response = await fetch(`/api/households?${params.toString()}`, {
+    const response = await fetch(`/api/households${paramsString}`, {
       method: 'GET',
       credentials: 'include',
     });
-
-    console.log("Fetching households with paging:", paging);
 
     if (!response.ok) {
       throw new Error('Failed to fetch households');
     }
 
-    return response.json();
+    const data = await response.json();
+
+    return data;
   },
 
   getMembers: async (householdId, paging = null) => {
-    const params = new URLSearchParams({
-      page: paging.page,
-      size: paging.size,
-      sort: paging.sort
-    });
-
-    const response = await fetch(`/api/households/${householdId}/members${params.toString()}`, {
+    const response = await fetch(`/api/households/${householdId}/members`, {
       method: 'GET',
       credentials: 'include',
     });
+
+    console.log("Fetching members for household ID:", householdId);
+
     if (!response.ok) {
       throw new Error('Failed to fetch household members');
     }
-    return response.json();
+
+    const data = await response.json();
+    return data;
   }
 };
 
