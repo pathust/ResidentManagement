@@ -123,7 +123,7 @@ const PersonAddModal = ({ open, onClose, onSubmit }) => {
       confirmLoading={loading}
       width={900}
       centered
-      destroyOnClose
+      destroyOnHidden={true}
       maskClosable={false}
       styles={{
         body: {

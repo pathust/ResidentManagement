@@ -14,10 +14,26 @@ export async function GET(req) {
         return NextResponse.json({ error: "No permissions found" }, { status: 401 });
     }
 
-    const queryParams = req.nextUrl.search.toString() || "";
+    const { searchParams } = new URL(req.url);
+
     
+    const pageSize = Number(searchParams.get("pageSize") ?? 10);
+    const pageIndex = Number(searchParams.get("pageIndex") ?? 0);
+    console.log("Page Index:", pageIndex);
+    console.log("Page Size:", pageSize);
+
+    if (pageIndex === null || pageIndex === undefined){
+        return NextResponse.json({ error: "Invalid request: Missing paging index" }, { status: 400 });
+    }
+
     try {
-        const response = await fetch(`${SERVER_URL}/api/households${queryParams}`, {
+        const params = new URLSearchParams({
+            page: pageIndex,
+            size: pageSize,
+            sort: "id"
+        });
+kksdafjlk
+        const response = await fetch(`${SERVER_URL}/api/households?${params.toString()}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

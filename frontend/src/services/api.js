@@ -35,11 +35,18 @@ export const authAPI = {
 };
 
 export const householdAPI = {
-  getAll: async () => {
-    const response = await fetch('/api/households', {
+  getAll: async (paging = null) => {
+    if (!paging) paging = {};
+    const params = new URLSearchParams(paging);
+
+    console.log("Paging params:", params.toString());
+
+    const response = await fetch(`/api/households?${params.toString()}`, {
       method: 'GET',
       credentials: 'include',
     });
+
+    console.log("Fetching households with paging:", paging);
 
     if (!response.ok) {
       throw new Error('Failed to fetch households');
@@ -49,16 +56,13 @@ export const householdAPI = {
   },
 
   getMembers: async (householdId, paging = null) => {
-    if (paging === null)
-      paging = {
-        page: 0,
-        size: 10,
-        sort: "id"
-      };
-    
-    const queryParams = new URLSearchParams(pageing).toString();
+    const params = new URLSearchParams({
+      page: paging.page,
+      size: paging.size,
+      sort: paging.sort
+    });
 
-    const response = await fetch(`/api/households/${householdId}/members?${queryParams}`, {
+    const response = await fetch(`/api/households/${householdId}/members${params.toString()}`, {
       method: 'GET',
       credentials: 'include',
     });
