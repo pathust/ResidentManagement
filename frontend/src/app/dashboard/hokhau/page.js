@@ -24,7 +24,6 @@ export default function HoKhauPage() {
     try {
       const data = await householdAPI.getAll();
       setHouseholdData(data);
-      console.log("Fetched household data:", data);
     } catch (error) {
       console.error(error);
       message.error("Không thể tải danh sách hộ khẩu");
