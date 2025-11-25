@@ -4,7 +4,7 @@ import com.soict.dto.person.*;
 import com.soict.entity.person.*;
 import com.soict.exception.ResourceNotFoundException;
 import com.soict.exception.BusinessException;
-import com.soict.mapper.PersonMapper;
+import com.soict.mapper.person.PersonMapper;
 import com.soict.repository.person.*;
 import com.soict.repository.household.HouseholdMembershipRepository;
 import lombok.RequiredArgsConstructor;
