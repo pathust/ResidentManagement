@@ -1,12 +1,13 @@
 package com.soict.service;
 
-import com.soict.dto.stats.AgeGroupStatsDTO;
-import com.soict.dto.stats.GenderStatsDTO;
-import com.soict.dto.stats.PersonOverviewStatsDTO;
-import com.soict.dto.stats.WardPersonStatsDTO;
+import com.soict.dto.stats.*;
+import com.soict.entity.household.Household;
+import com.soict.entity.household.HouseholdMembership;
 import com.soict.entity.person.Person;
 import com.soict.entity.person.event.TemporaryAbsence;
 import com.soict.entity.person.event.TemporaryResidence;
+import com.soict.repository.household.HouseholdMembershipRepository;
+import com.soict.repository.household.HouseholdRepository;
 import com.soict.repository.person.PersonRepository;
 import com.soict.repository.person.event.PersonTemporaryAbsenceRepository;
 import com.soict.repository.person.event.PersonTemporaryResidenceRepository;
@@ -27,11 +28,17 @@ public class StatsService {
     private final PersonRepository personRepository;
     private final PersonTemporaryResidenceRepository personTemporaryResidenceRepository;
     private final PersonTemporaryAbsenceRepository personTemporaryAbsenceRepository;
-
+    private final HouseholdRepository householdRepository;
+    private final HouseholdMembershipRepository householdMembershipRepository;
 
     private Specification<Person> aliveSpec() {
         return (root, query, cb) ->
                 cb.notEqual(root.get("status"), Person.PersonStatus.DEAD);
+    }
+
+    private Specification<HouseholdMembership> activeSpec() {
+        return (root, query, cb) ->
+                cb.isNull(root.get("endDate"));
     }
 
     private Specification<Person> wardSpec(Integer wardId) {
@@ -214,5 +221,15 @@ public class StatsService {
         };
 
         return personTemporaryAbsenceRepository.count(spec);
+    }
+
+    public HouseholdOverviewStatsDTO countActiveHousehold() {
+        long numActiveHousehold = householdMembershipRepository.countActiveHousehold();
+        return new HouseholdOverviewStatsDTO(numActiveHousehold);
+    }
+
+    public WardHouseholdStatsDTO countActiveHouseholdByWardId(Integer wardId) {
+        long numActiveHousehold = householdMembershipRepository.countActiveHouseholdByWardId(wardId);
+        return new WardHouseholdStatsDTO(wardId, numActiveHousehold);
     }
 }
