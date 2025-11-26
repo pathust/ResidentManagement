@@ -1,28 +1,40 @@
 package com.soict.dto.fund;
 
-import lombok.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExpenseDTO {
-    private Integer id;
+@Builder
+public class ExpenseCreateDTO {
+    @NotNull(message = "Fund ID is required")
     private Integer fundId;
-    private String fundName;
+
     private LocalDate expenseDate;
+
+    @NotNull(message = "Amount is required")
     private BigDecimal amount;
+
     private String description;
+
     private Integer approverUserId;
-    private String approverUsername;
+
+    @Size(max = 255)
     private String recipient;
+
+    @Size(max = 255)
     private String proof;
+
+    @Size(max = 50)
     private String status; // PENDING, APPROVED, REJECTED
+
     private String notes;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }
