@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Form, Input, DatePicker, Select, message } from "antd";
+import { Modal, Button, Form, Input, DatePicker, Select, message, Tag } from "antd";
 import dayjs from "dayjs";
 import { locationAPI } from "@/services/api";
 
@@ -186,6 +186,7 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
       delete formValues.tempAddressProvinceName;
       delete formValues.currentHouseholdCode;
   
+      // Merge với person gốc (giữ nguyên status)
       const completeData = {
         ...person,
         ...formValues,
@@ -245,6 +246,15 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
         },
       }}
     >
+      {/* Status Badge - hiển thị ở đầu modal */}
+      <div className="mb-4 flex items-center gap-2">
+        <span className="text-sm font-medium">Trạng thái:</span>
+        <Tag color={person?.status === "ALIVE" ? "green" : "red"} className="text-sm">
+          {person?.status === "ALIVE" ? "Còn sống" : "Đã mất"}
+        </Tag>
+        {person?.status === "DEAD"}
+      </div>
+
       <Form
         form={form}
         layout="vertical"
@@ -631,29 +641,12 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           <h3 className="font-semibold text-lg border-b pb-1 mb-3">Khác</h3>
           
           {!editing ? (
-            <div className="grid grid-cols-2 gap-4">
-              <ReadOnlyField 
-                label="Trạng thái" 
-                value={person?.status === 'ALIVE' ? 'Còn sống' : 'Đã mất'} 
-              />
-              <div className="col-span-2">
-                <ReadOnlyField label="Ghi chú" value={person?.notes} />
-              </div>
+            <div className="grid grid-cols-1 gap-4">
+              <ReadOnlyField label="Ghi chú" value={person?.notes} />
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                label="Trạng thái"
-                name="status"
-                rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
-              >
-                <Select>
-                  <Select.Option value="ALIVE">Còn sống</Select.Option>
-                  <Select.Option value="DEAD">Đã mất</Select.Option>
-                </Select>
-              </Form.Item>
-
-              <Form.Item label="Ghi chú" name="notes" className="col-span-2">
+            <div className="grid grid-cols-1 gap-4">
+              <Form.Item label="Ghi chú" name="notes">
                 <Input.TextArea 
                   rows={3} 
                   placeholder="Ghi chú thêm..." 

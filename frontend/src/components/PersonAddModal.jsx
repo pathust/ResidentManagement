@@ -89,6 +89,9 @@ const PersonAddModal = ({ open, onClose, onSubmit }) => {
       delete values.permAddressProvinceId;
       delete values.tempAddressProvinceId;
 
+      // Set default status to ALIVE
+      values.status = "ALIVE";
+
       setLoading(true);
       await onSubmit(values);
       
@@ -422,20 +425,8 @@ const PersonAddModal = ({ open, onClose, onSubmit }) => {
         {/* Thông tin khác */}
         <div>
           <h3 className="font-semibold text-lg border-b pb-1 mb-3">Khác</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <Form.Item
-              label="Trạng thái"
-              name="status"
-              initialValue="ALIVE"
-              rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
-            >
-              <Select>
-                <Select.Option value="ALIVE">Còn sống</Select.Option>
-                <Select.Option value="DEAD">Đã mất</Select.Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item label="Ghi chú" name="notes" className="col-span-2">
+          <div className="grid grid-cols-1 gap-4">
+            <Form.Item label="Ghi chú" name="notes">
               <Input.TextArea 
                 rows={3} 
                 placeholder="Ghi chú thêm..." 
