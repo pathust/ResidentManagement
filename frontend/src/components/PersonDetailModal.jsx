@@ -45,7 +45,6 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
       if (!person) return;
 
       try {
-        // Load wards cho quê quán
         if (person.placeOfOriginWardId) {
           const ward = await locationAPI.getWardById(person.placeOfOriginWardId);
           if (ward?.provinceId) {
@@ -54,7 +53,6 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           }
         }
 
-        // Load wards cho thường trú
         if (person.permAddressWardId) {
           const ward = await locationAPI.getWardById(person.permAddressWardId);
           if (ward?.provinceId) {
@@ -63,7 +61,6 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           }
         }
 
-        // Load wards cho tạm trú
         if (person.tempAddressWardId) {
           const ward = await locationAPI.getWardById(person.tempAddressWardId);
           if (ward?.provinceId) {
@@ -121,15 +118,12 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
 
   const handleCancelEdit = () => {
     setEditing(false);
-
-    // Reset form về giá trị ban đầu
     if (person) {
       loadFormData(person);
     }
   };
 
   const loadFormData = async (personData) => {
-    // Tìm provinceId từ wardId
     let placeOfOriginProvinceId = null;
     let permAddressProvinceId = null;
     let tempAddressProvinceId = null;
@@ -173,7 +167,6 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
     try {
       const formValues = await form.validateFields();
   
-      // Format dates
       if (formValues.idIssueDate) {
         formValues.idIssueDate = formValues.idIssueDate.format("YYYY-MM-DD");
       }
@@ -181,7 +174,6 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
         formValues.dateOfBirth = formValues.dateOfBirth.format("YYYY-MM-DD");
       }
   
-      // Remove province fields và các field chỉ dùng để hiển thị
       delete formValues.placeOfOriginProvinceId;
       delete formValues.permAddressProvinceId;
       delete formValues.tempAddressProvinceId;
@@ -194,7 +186,6 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
       delete formValues.tempAddressProvinceName;
       delete formValues.currentHouseholdCode;
   
-      // Merge với person gốc
       const completeData = {
         ...person,
         ...formValues,
@@ -215,11 +206,20 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
     }
   };
 
-  // Load data khi person thay đổi
   useEffect(() => {
     if (!person) return;
     loadFormData(person);
   }, [person, form]);
+
+  // Component hiển thị field ở chế độ xem
+  const ReadOnlyField = ({ label, value }) => (
+    <div className="mb-6">
+      <div className="text-sm text-gray-600 mb-2">{label}</div>
+      <div className="h-8 px-3 flex items-center bg-gray-50 border border-gray-200 rounded text-gray-900">
+        {value || "—"}
+      </div>
+    </div>
+  );
 
   return (
     <Modal
@@ -255,69 +255,85 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           <h3 className="font-semibold text-lg border-b pb-1 mb-3">
             Thông tin cơ bản
           </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <Form.Item
-              label="Họ và tên"
-              name="fullName"
-              rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
-            >
-              <Input placeholder="Nguyễn Văn A" disabled={!editing} />
-            </Form.Item>
-
-            <Form.Item
-              label="Giới tính"
-              name="gender"
-              rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
-            >
-              <Select placeholder="Chọn giới tính" disabled={!editing}>
-                <Select.Option value="M">Nam</Select.Option>
-                <Select.Option value="F">Nữ</Select.Option>
-                <Select.Option value="X">Khác</Select.Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              label="Ngày sinh"
-              name="dateOfBirth"
-              rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
-            >
-              <DatePicker 
-                className="w-full" 
-                format="DD/MM/YYYY" 
-                placeholder="Chọn ngày sinh"
-                disabled={!editing}
+          
+          {!editing ? (
+            <div className="grid grid-cols-2 gap-4">
+              <ReadOnlyField label="Họ và tên" value={person?.fullName} />
+              <ReadOnlyField 
+                label="Giới tính" 
+                value={person?.gender === 'M' ? 'Nam' : person?.gender === 'F' ? 'Nữ' : 'Khác'} 
               />
-            </Form.Item>
-
-            <Form.Item label="Nơi sinh" name="placeOfBirth">
-              <Input placeholder="Hà Nội" disabled={!editing} />
-            </Form.Item>
-
-            <Form.Item 
-              label="Dân tộc" 
-              name="ethnicityId"
-              rules={[{ required: true, message: "Vui lòng chọn dân tộc" }]}
-            >
-              <Select 
-                placeholder="Chọn dân tộc"
-                showSearch
-                disabled={!editing}
-                filterOption={(input, option) =>
-                  option.children.toLowerCase().includes(input.toLowerCase())
-                }
+              <ReadOnlyField 
+                label="Ngày sinh" 
+                value={person?.dateOfBirth ? dayjs(person.dateOfBirth).format('DD/MM/YYYY') : null} 
+              />
+              <ReadOnlyField label="Nơi sinh" value={person?.placeOfBirth} />
+              <ReadOnlyField label="Dân tộc" value={person?.ethnicityName} />
+              <ReadOnlyField label="Tôn giáo" value={person?.religion} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item
+                label="Họ và tên"
+                name="fullName"
+                rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
               >
-                {ethnicities.map(eth => (
-                  <Select.Option key={eth.id} value={eth.id}>
-                    {eth.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
+                <Input placeholder="Nguyễn Văn A" />
+              </Form.Item>
 
-            <Form.Item label="Tôn giáo" name="religion">
-              <Input placeholder="Không" disabled={!editing} />
-            </Form.Item>
-          </div>
+              <Form.Item
+                label="Giới tính"
+                name="gender"
+                rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
+              >
+                <Select placeholder="Chọn giới tính">
+                  <Select.Option value="M">Nam</Select.Option>
+                  <Select.Option value="F">Nữ</Select.Option>
+                  <Select.Option value="X">Khác</Select.Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                label="Ngày sinh"
+                name="dateOfBirth"
+                rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
+              >
+                <DatePicker 
+                  className="w-full" 
+                  format="DD/MM/YYYY" 
+                  placeholder="Chọn ngày sinh"
+                />
+              </Form.Item>
+
+              <Form.Item label="Nơi sinh" name="placeOfBirth">
+                <Input placeholder="Hà Nội" />
+              </Form.Item>
+
+              <Form.Item 
+                label="Dân tộc" 
+                name="ethnicityId"
+                rules={[{ required: true, message: "Vui lòng chọn dân tộc" }]}
+              >
+                <Select 
+                  placeholder="Chọn dân tộc"
+                  showSearch
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {ethnicities.map(eth => (
+                    <Select.Option key={eth.id} value={eth.id}>
+                      {eth.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item label="Tôn giáo" name="religion">
+                <Input placeholder="Không" />
+              </Form.Item>
+            </div>
+          )}
         </div>
 
         {/* Giấy tờ tùy thân */}
@@ -325,24 +341,35 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           <h3 className="font-semibold text-lg border-b pb-1 mb-3">
             Giấy tờ tùy thân
           </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <Form.Item label="Số CMND/CCCD" name="idNumber">
-              <Input placeholder="001234567890" disabled={!editing} />
-            </Form.Item>
-
-            <Form.Item label="Ngày cấp" name="idIssueDate">
-              <DatePicker 
-                className="w-full" 
-                format="DD/MM/YYYY" 
-                placeholder="Chọn ngày cấp"
-                disabled={!editing}
+          
+          {!editing ? (
+            <div className="grid grid-cols-2 gap-4">
+              <ReadOnlyField label="Số CMND/CCCD" value={person?.idNumber} />
+              <ReadOnlyField 
+                label="Ngày cấp" 
+                value={person?.idIssueDate ? dayjs(person.idIssueDate).format('DD/MM/YYYY') : null}
               />
-            </Form.Item>
+              <ReadOnlyField label="Nơi cấp" value={person?.idIssuePlace} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item label="Số CMND/CCCD" name="idNumber">
+                <Input placeholder="001234567890" />
+              </Form.Item>
 
-            <Form.Item label="Nơi cấp" name="idIssuePlace">
-              <Input placeholder="Công an TP Hà Nội" disabled={!editing} />
-            </Form.Item>
-          </div>
+              <Form.Item label="Ngày cấp" name="idIssueDate">
+                <DatePicker 
+                  className="w-full" 
+                  format="DD/MM/YYYY" 
+                  placeholder="Chọn ngày cấp"
+                />
+              </Form.Item>
+
+              <Form.Item label="Nơi cấp" name="idIssuePlace">
+                <Input placeholder="Công an TP Hà Nội" />
+              </Form.Item>
+            </div>
+          )}
         </div>
 
         {/* Địa chỉ */}
@@ -353,35 +380,21 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           <div className="mb-4">
             <p className="text-sm font-medium mb-2">Quê quán</p>
             {!editing ? (
-              // Chế độ xem: Hiển thị text
               <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm text-gray-500">Tỉnh/Thành phố</label>
-                  <Input 
-                    disabled 
-                    value={person?.placeOfOriginProvinceName || "—"} 
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Phường/Xã</label>
-                  <Input 
-                    disabled 
-                    value={person?.placeOfOriginWardName || "—"} 
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Chi tiết địa chỉ</label>
-                  <Input 
-                    disabled 
-                    value={person?.placeOfOriginDetails || "—"} 
-                    className="mt-1"
-                  />
-                </div>
+                <ReadOnlyField 
+                  label="Tỉnh/Thành phố" 
+                  value={person?.placeOfOriginProvinceName} 
+                />
+                <ReadOnlyField 
+                  label="Phường/Xã" 
+                  value={person?.placeOfOriginWardName} 
+                />
+                <ReadOnlyField 
+                  label="Chi tiết địa chỉ" 
+                  value={person?.placeOfOriginDetails} 
+                />
               </div>
             ) : (
-              // Chế độ sửa: Hiển thị Select
               <div className="grid grid-cols-3 gap-4">
                 <Form.Item 
                   label="Tỉnh/Thành phố" 
@@ -435,35 +448,21 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           <div className="mb-4">
             <p className="text-sm font-medium mb-2">Địa chỉ thường trú</p>
             {!editing ? (
-              // Chế độ xem: Hiển thị text
               <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm text-gray-500">Tỉnh/Thành phố</label>
-                  <Input 
-                    disabled 
-                    value={person?.permAddressProvinceName || "—"} 
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Phường/Xã</label>
-                  <Input 
-                    disabled 
-                    value={person?.permAddressWardName || "—"} 
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Chi tiết địa chỉ</label>
-                  <Input 
-                    disabled 
-                    value={person?.permAddressDetails || "—"} 
-                    className="mt-1"
-                  />
-                </div>
+                <ReadOnlyField 
+                  label="Tỉnh/Thành phố" 
+                  value={person?.permAddressProvinceName} 
+                />
+                <ReadOnlyField 
+                  label="Phường/Xã" 
+                  value={person?.permAddressWardName} 
+                />
+                <ReadOnlyField 
+                  label="Chi tiết địa chỉ" 
+                  value={person?.permAddressDetails} 
+                />
               </div>
             ) : (
-              // Chế độ sửa: Hiển thị Select
               <div className="grid grid-cols-3 gap-4">
                 <Form.Item 
                   label="Tỉnh/Thành phố" 
@@ -517,35 +516,21 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           <div>
             <p className="text-sm font-medium mb-2">Địa chỉ tạm trú (không bắt buộc)</p>
             {!editing ? (
-              // Chế độ xem: Hiển thị text
               <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm text-gray-500">Tỉnh/Thành phố</label>
-                  <Input 
-                    disabled 
-                    value={person?.tempAddressProvinceName || "—"} 
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Phường/Xã</label>
-                  <Input 
-                    disabled 
-                    value={person?.tempAddressWardName || "—"} 
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Chi tiết địa chỉ</label>
-                  <Input 
-                    disabled 
-                    value={person?.tempAddressDetails || "—"} 
-                    className="mt-1"
-                  />
-                </div>
+                <ReadOnlyField 
+                  label="Tỉnh/Thành phố" 
+                  value={person?.tempAddressProvinceName} 
+                />
+                <ReadOnlyField 
+                  label="Phường/Xã" 
+                  value={person?.tempAddressWardName} 
+                />
+                <ReadOnlyField 
+                  label="Chi tiết địa chỉ" 
+                  value={person?.tempAddressDetails} 
+                />
               </div>
             ) : (
-              // Chế độ sửa: Hiển thị Select
               <div className="grid grid-cols-3 gap-4">
                 <Form.Item 
                   label="Tỉnh/Thành phố" 
@@ -602,60 +587,82 @@ const PersonDetailModal = ({ open, onClose, person, onSubmit }) => {
           <h3 className="font-semibold text-lg border-b pb-1 mb-3">
             Liên hệ & Công việc
           </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <Form.Item label="Nghề nghiệp" name="occupation">
-              <Input placeholder="Kỹ sư" disabled={!editing} />
-            </Form.Item>
+          
+          {!editing ? (
+            <div className="grid grid-cols-2 gap-4">
+              <ReadOnlyField label="Nghề nghiệp" value={person?.occupation} />
+              <ReadOnlyField label="Nơi làm việc" value={person?.workplace} />
+              <ReadOnlyField label="Số điện thoại" value={person?.phoneNumber} />
+              <ReadOnlyField label="Email" value={person?.emailAddress} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item label="Nghề nghiệp" name="occupation">
+                <Input placeholder="Kỹ sư" />
+              </Form.Item>
 
-            <Form.Item label="Nơi làm việc" name="workplace">
-              <Input placeholder="Công ty ABC" disabled={!editing} />
-            </Form.Item>
+              <Form.Item label="Nơi làm việc" name="workplace">
+                <Input placeholder="Công ty ABC" />
+              </Form.Item>
 
-            <Form.Item
-              label="Số điện thoại"
-              name="phoneNumber"
-              rules={[
-                { pattern: /^[0-9]{10,15}$/, message: "Số điện thoại không hợp lệ" },
-              ]}
-            >
-              <Input placeholder="0123456789" disabled={!editing} />
-            </Form.Item>
+              <Form.Item
+                label="Số điện thoại"
+                name="phoneNumber"
+                rules={[
+                  { pattern: /^[0-9]{10,15}$/, message: "Số điện thoại không hợp lệ" },
+                ]}
+              >
+                <Input placeholder="0123456789" />
+              </Form.Item>
 
-            <Form.Item
-              label="Email"
-              name="emailAddress"
-              rules={[{ type: "email", message: "Email không hợp lệ" }]}
-            >
-              <Input placeholder="email@example.com" disabled={!editing} />
-            </Form.Item>
-          </div>
+              <Form.Item
+                label="Email"
+                name="emailAddress"
+                rules={[{ type: "email", message: "Email không hợp lệ" }]}
+              >
+                <Input placeholder="email@example.com" />
+              </Form.Item>
+            </div>
+          )}
         </div>
 
         {/* Thông tin khác */}
         <div>
           <h3 className="font-semibold text-lg border-b pb-1 mb-3">Khác</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <Form.Item
-              label="Trạng thái"
-              name="status"
-              rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
-            >
-              <Select disabled={!editing}>
-                <Select.Option value="ALIVE">Còn sống</Select.Option>
-                <Select.Option value="DEAD">Đã mất</Select.Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item label="Ghi chú" name="notes" className="col-span-2">
-              <Input.TextArea 
-                rows={3} 
-                placeholder="Ghi chú thêm..." 
-                showCount 
-                maxLength={1000}
-                disabled={!editing}
+          
+          {!editing ? (
+            <div className="grid grid-cols-2 gap-4">
+              <ReadOnlyField 
+                label="Trạng thái" 
+                value={person?.status === 'ALIVE' ? 'Còn sống' : 'Đã mất'} 
               />
-            </Form.Item>
-          </div>
+              <div className="col-span-2">
+                <ReadOnlyField label="Ghi chú" value={person?.notes} />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item
+                label="Trạng thái"
+                name="status"
+                rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
+              >
+                <Select>
+                  <Select.Option value="ALIVE">Còn sống</Select.Option>
+                  <Select.Option value="DEAD">Đã mất</Select.Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item label="Ghi chú" name="notes" className="col-span-2">
+                <Input.TextArea 
+                  rows={3} 
+                  placeholder="Ghi chú thêm..." 
+                  showCount 
+                  maxLength={1000}
+                />
+              </Form.Item>
+            </div>
+          )}
         </div>
       </Form>
 
