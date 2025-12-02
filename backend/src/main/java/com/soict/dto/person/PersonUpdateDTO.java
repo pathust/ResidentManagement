@@ -18,19 +18,16 @@ public class PersonUpdateDTO {
     @Size(max = 255)
     private String fullName;
 
-    @NotNull(message = "Date of birth is required")
     private LocalDate dateOfBirth;
 
     @Size(max = 255)
     private String placeOfBirth;
 
-    @NotNull(message = "Place of origin ward is required")
     private Integer placeOfOriginWardId;
 
     @Size(max = 255)
     private String placeOfOriginDetails;
 
-    @NotNull(message = "Ethnicity is required")
     private Integer ethnicityId;
 
     @Size(max = 100)

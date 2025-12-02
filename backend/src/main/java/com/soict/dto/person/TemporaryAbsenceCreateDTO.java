@@ -17,7 +17,6 @@ public class TemporaryAbsenceCreateDTO {
 
     private Integer currentHouseholdId;
 
-    @NotNull(message = "Start date is required")
     private LocalDate startDate;
     private LocalDate endDate;
 

@@ -118,4 +118,24 @@ public class HouseholdController {
         return ResponseEntity.ok(householdService.searchHouseholds(
                 code, address, wardId, headName, pageable));
     }
+
+    @Operation(summary = "Init household with members (create household + memberships)")
+    @PostMapping("/init")
+    @PreAuthorize("hasAnyAuthority('CREATE_HOUSEHOLD', 'ROLE_ADMIN')")
+    public ResponseEntity<HouseholdDetailDTO> initHousehold(
+            @Valid @RequestBody HouseholdInitCreateDTO dto
+    ) {
+        HouseholdDetailDTO result = householdService.initHousehold(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @Operation(summary = "Change a person's household (transfer membership)")
+    @PostMapping("/change-household")
+    @PreAuthorize("hasAnyAuthority('UPDATE_HOUSEHOLD', 'ROLE_ADMIN')")
+    public ResponseEntity<HouseholdChangeDTO> changeHousehold(
+            @Valid @RequestBody HouseholdChangeCreateDTO dto
+    ) {
+        HouseholdChangeDTO result = householdService.changeHousehold(dto);
+        return ResponseEntity.ok(result);
+    }
 }

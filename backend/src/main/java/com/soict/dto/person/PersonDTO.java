@@ -17,7 +17,6 @@ public class PersonDTO {
     @Size(max = 255)
     private String fullName;
 
-    @NotNull(message = "Date of birth is required")
     private LocalDate dateOfBirth;
 
     @Size(max = 255)

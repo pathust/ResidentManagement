@@ -25,7 +25,7 @@ public class BirthDeclareController {
 
     private final PersonService personService;
 
-    @Operation(summary = "Create birth declare (new person OR existing person)")
+    @Operation(summary = "Create birth declare (existing person), do not pass in PersonCreate")
     @PostMapping
     public ResponseEntity<BirthDeclareDTO> create(@Valid @RequestBody BirthDeclareRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED)
