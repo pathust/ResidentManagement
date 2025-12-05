@@ -326,15 +326,10 @@ public class PersonService {
         if (dto.getDeclarerId() == null) {
             throw new BusinessException("Declarer ID is required");
         }
-        if (dto.getDateOfDeclaration() == null) {
-            throw new BusinessException("Date of declaration is required");
-        }
-        if (dto.getLastPermanentResidenceWardId() == null) {
-            throw new BusinessException("Last permanent residence ward is required");
-        }
-        if (dto.getDateOfDeclaration().isBefore(ChronoLocalDate.from(dto.getTimeOfDeath()))) {
-            throw new BusinessException("Declaration date must be >= date of death");
-        }
+        //        if (dto.getDateOfDeclaration().isBefore(ChronoLocalDate.from(dto.getTimeOfDeath()))) {
+        //            throw new BusinessException("Declaration date must be >= date of death");
+        //        }
+
         Person person;
         if (dto.getPersonId() != null) {
             person = personRepository.findById(dto.getPersonId())
@@ -343,10 +338,12 @@ public class PersonService {
             person = personRepository.findPersonByIdNumber(dto.getIdNumber())
                     .orElseThrow(() -> new ResourceNotFoundException("Person not found with ID number: " + dto.getIdNumber()));
         }
+
         var existingDeclares = personDeathDeclareRepository.findByPersonIdOrderByDeclareDateDesc(person.getId());
         if (!existingDeclares.isEmpty()) {
             throw new BusinessException("This person already has a death declaration");
         }
+
         Person declarer = personRepository.findById(dto.getDeclarerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Declarer not found with id: " + dto.getDeclarerId()));
 
@@ -362,18 +359,34 @@ public class PersonService {
         dd.setPerson(person);
         dd.setDeclarer(declarer);
         dd.setTimeOfDeath(dto.getTimeOfDeath());
-        dd.setDateOfDeclaration(dto.getDateOfDeclaration());
+
+        LocalDate dateOfDeclaration = dto.getDateOfDeclaration();
+        if (dateOfDeclaration == null) {
+            dateOfDeclaration = LocalDate.now();
+        }
+        dd.setDateOfDeclaration(dateOfDeclaration);
 
         Integer wardId = dto.getLastPermanentResidenceWardId();
         if (wardId == null) {
-            throw new BusinessException("Last permanent residence ward is required");
+            wardId = person.getPermAddressWardId();
         }
 
-        Ward ward = wardRepository.findById(wardId)
-                .orElseThrow(() -> new ResourceNotFoundException("Ward not found: " + wardId));
-        dd.setLastPermanentResidenceWard(ward);
+        if (wardId != null) {
+            final Integer wardIdFinal = wardId;   // <- biến final cho lambda
+            Ward ward = wardRepository.findById(wardIdFinal)
+                    .orElseThrow(() -> new ResourceNotFoundException("Ward not found: " + wardIdFinal));
+            dd.setLastPermanentResidenceWard(ward);
+        } else {
+            dd.setLastPermanentResidenceWard(null);
+        }
+
+        String lastPermDetails = dto.getLastPermanentResidenceDetails();
+        if (lastPermDetails == null || lastPermDetails.isBlank()) {
+            lastPermDetails = person.getPermAddressDetails();
+        }
+        dd.setLastPermanentResidenceDetails(lastPermDetails);
+
         dd.setNote(dto.getNote());
-        dd.setLastPermanentResidenceDetails(dto.getLastPermanentResidenceDetails());
 
         DeathDeclare saved = personDeathDeclareRepository.save(dd);
 
@@ -384,11 +397,17 @@ public class PersonService {
         }
 
         householdMembershipRepository.findActiveByPersonId(person.getId()).ifPresent(m -> {
-            m.setEndDate(LocalDate.from(dto.getTimeOfDeath()));
+            if (dto.getTimeOfDeath() != null) {
+                m.setEndDate(LocalDate.from(dto.getTimeOfDeath()));
+            } else {
+                m.setEndDate(LocalDate.now());
+            }
             householdMembershipRepository.save(m);
         });
+
         return deathDeclareMapper.toDTO(saved);
     }
+
 
     @Transactional
     public void deleteDeathDeclare(Integer declareId) {
@@ -493,10 +512,14 @@ public class PersonService {
     public TemporaryResidenceDTO createTemporaryResidence(TemporaryResidenceCreateDTO dto) {
         if (dto == null) throw new BusinessException("Payload is required");
         if (dto.getPersonId() == null) throw new BusinessException("personId is required");
-        if (dto.getStartDate() == null) throw new BusinessException("startDate is required");
         if (dto.getTempAddressWardId() == null) throw new BusinessException("tempAddressWardId is required");
 
-        if (dto.getEndDate() != null && dto.getEndDate().isBefore(dto.getStartDate())) {
+        LocalDate startDate = dto.getStartDate();
+        if (startDate == null) {
+            startDate = LocalDate.now();
+        }
+
+        if (dto.getEndDate() != null && dto.getEndDate().isBefore(startDate)) {
             throw new BusinessException("endDate must be >= startDate");
         }
 
@@ -522,14 +545,14 @@ public class PersonService {
         TemporaryResidence tr = new TemporaryResidence();
         tr.setPerson(person);
         tr.setCurrentHousehold(currentHousehold);
-        tr.setStartDate(dto.getStartDate());
+        tr.setStartDate(startDate);
         tr.setEndDate(dto.getEndDate());
         tr.setTempAddressWard(tempWard);
         tr.setTempAddressDetails(dto.getTempAddressDetails());
         tr.setDetails(dto.getDetails());
 
-        person.setTempAddressWardId(tempWard.getId());   // cột int
-        person.setTempAddressWard(tempWard);             // quan hệ ManyToOne (đã insertable=false, updatable=false -> setId là đủ)
+        person.setTempAddressWardId(tempWard.getId());
+        person.setTempAddressWard(tempWard);
         person.setTempAddressDetails(dto.getTempAddressDetails());
         person.setUpdatedAt(java.time.LocalDateTime.now());
         personRepository.save(person);
@@ -537,6 +560,7 @@ public class PersonService {
         TemporaryResidence saved = personTemporaryResidenceRepository.save(tr);
         return temporaryResidenceMapper.toDTO(saved);
     }
+
 
     @Transactional
     public void deleteTemporaryResidence(Integer id) {
@@ -668,8 +692,13 @@ public class PersonService {
     public TemporaryAbsenceDTO createTemporaryAbsence(TemporaryAbsenceCreateDTO dto) {
         if (dto == null) throw new BusinessException("Payload is required");
         if (dto.getPersonId() == null) throw new BusinessException("personId is required");
-        if (dto.getStartDate() == null) throw new BusinessException("startDate is required");
-        if (dto.getEndDate() != null && dto.getEndDate().isBefore(dto.getStartDate())) {
+
+        LocalDate startDate = dto.getStartDate();
+        if (startDate == null) {
+            startDate = LocalDate.now();
+        }
+
+        if (dto.getEndDate() != null && dto.getEndDate().isBefore(startDate)) {
             throw new BusinessException("endDate must be >= startDate");
         }
 
@@ -678,50 +707,69 @@ public class PersonService {
         if (person.getStatus() == Person.PersonStatus.DEAD) {
             throw new BusinessException("Cannot create temporary absence for a deceased person");
         }
-
-        // --- Fallback currentHousehold ---
         Household currentHousehold = null;
         Integer hhId = dto.getCurrentHouseholdId() != null
                 ? dto.getCurrentHouseholdId()
-                : person.getCurrentHouseholdId();                 // lấy từ person nếu null
+                : person.getCurrentHouseholdId();
         if (hhId != null) {
             currentHousehold = householdRepository.findById(hhId)
                     .orElseThrow(() -> new ResourceNotFoundException("Household not found with id: " + hhId));
         } else {
-            throw new BusinessException("Current household is required (not provided and person has none)");
+            currentHousehold = person.getCurrentHousehold();
         }
 
-        // --- Fallback permAddressWard ---
-        Integer permWardId = dto.getPermAddressWardId() != null
-                ? dto.getPermAddressWardId()
-                : person.getPermAddressWardId();                 // lấy từ person nếu null
+        Integer permWardId = dto.getPermAddressWardId();
         if (permWardId == null) {
+            permWardId = person.getPermAddressWardId();
+        }
+
+        Ward permWard = null;
+        if (permWardId != null) {
+            final Integer permWardIdFinal = permWardId;
+            permWard = wardRepository.findById(permWardIdFinal)
+                    .orElseThrow(() -> new ResourceNotFoundException("Ward not found: " + permWardIdFinal));
+        } else {
             throw new BusinessException("Perm address ward is required (not provided and person has none)");
         }
-        Ward permWard = wardRepository.findById(permWardId)
-                .orElseThrow(() -> new ResourceNotFoundException("Ward not found: " + permWardId));
+
+        String permDetails = dto.getPermAddressDetails();
+        if (permDetails == null || permDetails.isBlank()) {
+            permDetails = person.getPermAddressDetails();
+        }
+
+        Integer tempWardId = dto.getTempAddressWardId();
+        if (tempWardId == null) {
+            tempWardId = person.getTempAddressWardId();
+        }
 
         Ward tempWard = null;
-        if (dto.getTempAddressWardId() != null) {
-            tempWard = wardRepository.findById(dto.getTempAddressWardId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Ward not found: " + dto.getTempAddressWardId()));
+        if (tempWardId != null) {
+            final Integer tempWardIdFinal = tempWardId;
+            tempWard = wardRepository.findById(tempWardIdFinal)
+                    .orElseThrow(() -> new ResourceNotFoundException("Ward not found: " + tempWardIdFinal));
+        }
+
+        String tempDetails = dto.getTempAddressDetails();
+        if (tempDetails == null || tempDetails.isBlank()) {
+            tempDetails = person.getTempAddressDetails();
         }
 
         TemporaryAbsence ta = new TemporaryAbsence();
         ta.setPerson(person);
         ta.setCurrentHousehold(currentHousehold);
-        ta.setStartDate(dto.getStartDate());
+        ta.setStartDate(startDate);
         ta.setEndDate(dto.getEndDate());
         ta.setDestination(dto.getDestination());
         ta.setReason(dto.getReason());
         ta.setPermAddressWard(permWard);
-        ta.setPermAddressDetails(dto.getPermAddressDetails());
+        ta.setPermAddressDetails(permDetails);
         ta.setTempAddressWard(tempWard);
-        ta.setTempAddressDetails(dto.getTempAddressDetails());
+        ta.setTempAddressDetails(tempDetails);
 
         TemporaryAbsence saved = personTemporaryAbsenceRepository.save(ta);
         return temporaryAbsenceMapper.toDTO(saved);
     }
+
 
 
     @Transactional
@@ -834,14 +882,15 @@ public class PersonService {
     }
 
 
-
-
     @Transactional
     public PermanentResidenceChangeDTO createPermanentResidenceChange(PermanentResidenceChangeCreateDTO dto) {
         if (dto == null) throw new BusinessException("Payload is required");
         if (dto.getPersonId() == null) throw new BusinessException("personId is required");
         if (dto.getAddressWardId() == null) throw new BusinessException("addressWardId is required");
-        if (dto.getStartDate() == null) throw new BusinessException("startDate is required");
+        LocalDate startDate = dto.getStartDate();
+        if (startDate == null) {
+            startDate = LocalDate.now();
+        }
 
         Person person = personRepository.findById(dto.getPersonId())
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + dto.getPersonId()));
@@ -873,6 +922,7 @@ public class PersonService {
         prc.setCurrentHousehold(currentHousehold);
         prc.setAddressWard(newWard);
         prc.setPrevAddressWard(prevWard);
+        prc.setStartDate(startDate);
 
         person.setPermAddressWardId(newWard.getId());
         person.setPermAddressWard(newWard);

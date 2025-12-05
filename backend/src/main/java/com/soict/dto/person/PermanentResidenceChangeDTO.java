@@ -31,7 +31,6 @@ public class PermanentResidenceChangeDTO {
     private String addressWardName;
     private String addressDetails;
 
-    @NotNull(message = "Start date is required")
     private LocalDate startDate;
 
     private String details;

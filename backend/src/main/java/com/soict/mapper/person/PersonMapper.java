@@ -9,10 +9,13 @@ public interface PersonMapper {
 
     // ========== Entity → DTO ==========
     @Mapping(target = "placeOfOriginWardName", source = "placeOfOriginWard.name")
+    @Mapping(target = "placeOfOriginProvinceName", source = "placeOfOriginWard.province.name")
     @Mapping(target = "ethnicityName", source = "ethnicity.name")
     @Mapping(target = "currentHouseholdCode", source = "currentHousehold.code")
     @Mapping(target = "permAddressWardName", source = "permAddressWard.name")
+    @Mapping(target = "permAddressProvinceName", source = "permAddressWard.province.name")
     @Mapping(target = "tempAddressWardName", source = "tempAddressWard.name")
+    @Mapping(target = "tempAddressProvinceName", source = "tempAddressWard.province.name")
     PersonDTO toDTO(Person person);
 
     // ========== CreateDTO → Entity ==========

@@ -35,20 +35,41 @@ export const authAPI = {
 };
 
 export const householdAPI = {
-  getAll: async (token) => {
-    const response = await fetch('/api/households', {
+  getAll: async (paging = null) => {
+    if (!paging) paging = {};
+    const params = new URLSearchParams(paging);
+
+    const paramsString = params.toString() ? `?${params.toString()}` : '';
+
+    const response = await fetch(`/api/households${paramsString}`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      credentials: 'include',
     });
 
     if (!response.ok) {
       throw new Error('Failed to fetch households');
     }
 
-    return response.json();
+    const data = await response.json();
+
+    return data;
   },
+
+  getMembers: async (householdId, paging = null) => {
+    const response = await fetch(`/api/households/${householdId}/members`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    console.log("Fetching members for household ID:", householdId);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch household members');
+    }
+
+    const data = await response.json();
+    return data;
+  }
 };
 
 export const personAPI = {
@@ -114,5 +135,73 @@ export const personAPI = {
     }
 
     return response.status === 204;
+  },
+};
+
+export const locationAPI = {
+  getAllProvinces: async () => {
+    const response = await fetch('/api/location/provinces', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch provinces');
+    return response.json();
+  },
+  
+  getWardsByProvince: async (provinceId) => {
+    const response = await fetch(`/api/location/wards?provinceId=${provinceId}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch wards');
+    return response.json();
+  },
+
+  getAllEthnicities: async () => {
+    const response = await fetch('/api/location/ethnicities', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch ethnicities');
+    return response.json();
+  },
+
+  getWardById: async (wardId) => {
+    const response = await fetch(`/api/location/wards/${wardId}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch ward');
+    return response.json();
+  }
+};
+
+export const feeAPI = {
+  getAll: async () => {
+    const response = await fetch('/api/fees', {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch fees');
+    }
+
+    return response.json();
+  },
+};
+
+export const rewardAPI = {
+  getAll: async () => {
+    const response = await fetch('/api/rewards', {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch rewards');
+    }
+
+    return response.json();
   },
 };

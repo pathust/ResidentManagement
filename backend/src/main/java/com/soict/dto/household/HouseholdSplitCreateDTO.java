@@ -14,10 +14,8 @@ public class HouseholdSplitCreateDTO {
 
     @NotNull
     private Integer fromHouseholdId;
-    private Integer toHouseholdId;
     private String newHouseholdCode;
 
-    @NotNull
     private LocalDate splitDate;
 
     private String note;

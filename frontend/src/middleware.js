@@ -5,8 +5,11 @@ export function middleware(request) {
 	const permissions = request.cookies.get("permissions")?.value;
 	const { pathname } = request.nextUrl;
 
-	if (accessToken && permissions && (pathname === "/login" || pathname === "/")){
-		return NextResponse.redirect(new URL("/dashboard", request.url));
+	if (pathname === "/login"){
+		if (accessToken && permissions){
+			return NextResponse.redirect(new URL("/dashboard", request.url));
+		}
+		return NextResponse.next();
 	}
 
 	if (!accessToken || !permissions){

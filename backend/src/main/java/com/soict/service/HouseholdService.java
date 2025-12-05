@@ -4,6 +4,8 @@ import com.soict.dto.household.*;
 import com.soict.entity.household.*;
 import com.soict.entity.household.event.HouseholdAddressChange;
 import com.soict.entity.household.event.HouseholdHeadChange;
+import com.soict.entity.household.event.HouseholdSplit;
+import com.soict.entity.household.event.HouseholdSplitMember;
 import com.soict.entity.location.Ward;
 import com.soict.entity.person.Person;
 import com.soict.exception.ResourceNotFoundException;
@@ -116,6 +118,91 @@ public class HouseholdService {
         return householdMapper.toDTO(saved);
     }
 
+    @Transactional
+    public HouseholdDetailDTO initHousehold(HouseholdInitCreateDTO dto) {
+        if (dto == null) throw new BusinessException("Payload is required");
+        if (dto.getCode() == null || dto.getCode().isBlank()) {
+            throw new BusinessException("Household code is required");
+        }
+        if (householdRepository.existsByCode(dto.getCode().trim())) {
+            throw new BusinessException("Household code already exists: " + dto.getCode());
+        }
+        if (dto.getWardId() == null) {
+            throw new BusinessException("wardId is required");
+        }
+        if (dto.getMembers() == null || dto.getMembers().isEmpty()) {
+            throw new BusinessException("members must not be empty");
+        }
+
+        long headCount = dto.getMembers().stream()
+                .filter(m -> Boolean.TRUE.equals(m.getIsHead()))
+                .count();
+        if (headCount != 1) {
+            throw new BusinessException("Exactly one member must be marked as head for the household");
+        }
+
+        Ward ward = wardRepository.findById(dto.getWardId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ward not found: " + dto.getWardId()));
+
+        LocalDate baseStartDate = dto.getStartDate();
+        if (baseStartDate == null) {
+            baseStartDate = LocalDate.now();
+        }
+
+        Household household = new Household();
+        household.setCode(dto.getCode().trim());
+        household.setWard(ward);
+        household.setWardId(ward.getId());
+        household.setNotes(dto.getNote());
+        household.setHouseAddressDetails(dto.getHouseAddressDetails());
+
+        household = householdRepository.save(household);
+
+        for (HouseholdInitMemberCreateDTO m : dto.getMembers()) {
+            var person = personRepository.findById(m.getPersonId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Person not found: " + m.getPersonId()));
+
+            var activeMemOpt = membershipRepository.findActiveByPersonId(person.getId());
+            if (activeMemOpt.isPresent()) {
+                throw new BusinessException("Person " + person.getId() + " already belongs to an active household");
+            }
+
+            LocalDate startDate = m.getStartDate() != null ? m.getStartDate() : baseStartDate;
+
+            String relation = m.getRelationWithHead();
+            if (relation == null || relation.isBlank()) {
+                relation = Boolean.TRUE.equals(m.getIsHead()) ? "Chủ hộ" : "Thành viên";
+            } else {
+                relation = relation.trim();
+            }
+
+//            if ("Chủ hộ".equalsIgnoreCase(relation) && !Boolean.TRUE.equals(m.getIsHead())) {
+//                throw new BusinessException("relationWithHead 'Chủ hộ' must be used only for the head member");
+//            }
+
+            HouseholdMembership membership = new HouseholdMembership();
+            membership.setHousehold(household);
+            membership.setPerson(person);
+            membership.setStartDate(startDate);
+            membership.setIsHouseholdHead(Boolean.TRUE.equals(m.getIsHead()));
+            membership.setRelationToHead(relation);
+
+            membership.setPrevPermAddressWard(person.getPermAddressWard());
+            membership.setPrevPermAddressDetails(person.getPermAddressDetails());
+
+            membershipRepository.save(membership);
+
+            person.setCurrentHousehold(household);
+            person.setCurrentHouseholdId(household.getId());
+            person.setPermAddressWardId(household.getWardId());
+            person.setPermAddressWard(household.getWard());
+            person.setPermAddressDetails(household.getHouseAddressDetails());
+            person.setUpdatedAt(java.time.LocalDateTime.now());
+            personRepository.save(person);
+        }
+
+        return getHouseholdById(household.getId());
+    }
 
     @Transactional
     public HouseholdDTO updateHousehold(Integer id, HouseholdUpdateDTO dto) {
@@ -278,6 +365,75 @@ public class HouseholdService {
                 .map(householdMapper::toDTO);
     }
 
+    @Transactional
+    public HouseholdChangeDTO changeHousehold(HouseholdChangeCreateDTO dto) {
+        if (dto == null) throw new BusinessException("Payload is required");
+        if (dto.getToHouseholdId() == null) throw new BusinessException("toHouseholdId is required");
+        if (dto.getPersonId() == null) throw new BusinessException("personId is required");
+
+        LocalDate changeDate = dto.getChangeDate();
+        if (changeDate == null) {
+            changeDate = LocalDate.now();
+        }
+
+        String relationWithHead = dto.getRelationWithHead();
+        if (relationWithHead == null) relationWithHead = "Thành viên";
+
+        var person = personRepository.findById(dto.getPersonId())
+                .orElseThrow(() -> new ResourceNotFoundException("Person not found: " + dto.getPersonId()));
+
+        var memOpt = membershipRepository.findActiveByPersonId(person.getId());
+        if (memOpt.isEmpty()) {
+            throw new BusinessException("Person has no active membership");
+        }
+        var oldMem = memOpt.get();
+        var from = oldMem.getHousehold();
+        Integer fromHouseholdId = from.getId();
+
+        var to = householdRepository.findById(dto.getToHouseholdId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "To household not found: " + dto.getToHouseholdId()
+                ));
+
+        if (fromHouseholdId.equals(to.getId())) {
+            throw new BusinessException("Person already belongs to the target household");
+        }
+
+        if (Boolean.TRUE.equals(oldMem.getIsHouseholdHead())) {
+            throw new BusinessException("Cannot transfer current household head. Change head first.");
+        }
+
+        oldMem.setEndDate(changeDate);
+        membershipRepository.save(oldMem);
+
+        var newMem = new HouseholdMembership();
+        newMem.setHousehold(to);
+        newMem.setPerson(person);
+        newMem.setStartDate(changeDate);
+        newMem.setIsHouseholdHead(false);
+        newMem.setRelationToHead(relationWithHead);
+        newMem.setPrevPermAddressWard(oldMem.getPrevPermAddressWard());
+        newMem.setPrevPermAddressDetails(oldMem.getPrevPermAddressDetails());
+        membershipRepository.save(newMem);
+
+        person.setCurrentHousehold(to);
+        person.setCurrentHouseholdId(to.getId());
+        person.setPermAddressWardId(to.getWardId());
+        person.setPermAddressWard(to.getWard());
+        person.setPermAddressDetails(to.getHouseAddressDetails());
+        person.setUpdatedAt(java.time.LocalDateTime.now());
+        personRepository.save(person);
+
+        return HouseholdChangeDTO.builder()
+                .fromHouseholdId(fromHouseholdId)
+                .toHouseholdId(to.getId())
+                .personId(person.getId())
+                .changeDate(changeDate)
+                .relationWithHead(relationWithHead)
+                .note(dto.getNote())
+                .build();
+    }
+
     public List<HouseholdAddressChangeDTO> getAllHouseholdAddressChanges() {
         return addressChangeRepository
                 .findAll(Sort.by(Sort.Direction.DESC, "changeDate"))
@@ -348,17 +504,20 @@ public class HouseholdService {
 
         Integer fromWardId = dto.getFromAddressWardId();
         if (fromWardId == null) {
-            if (household.getWard() == null) {
-                throw new BusinessException("Household has no ward; cannot derive fromAddressWard");
-            }
             fromWardId = household.getWard().getId();
         }
+        HouseholdAddressChange entity = addressChangeMapper.toEntity(dto);
 
-        final Integer fromWardIdFinal = fromWardId;
-        Ward fromWard = wardRepository.findById(fromWardIdFinal)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "From Ward not found with id: " + fromWardIdFinal));
+        String fromAddressDetails = dto.getFromAddressDetails();
+        if (fromAddressDetails == null) fromAddressDetails = household.getHouseAddressDetails();
 
+        if (fromWardId != null) {
+            final Integer fromWardIdFinal = fromWardId;
+            Ward fromWard = wardRepository.findById(fromWardIdFinal)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "From Ward not found with id: " + fromWardIdFinal));
+            entity.setFromAddressWard(fromWard);
+        }
         final Integer toWardIdFinal = dto.getToAddressWardId();
         Ward toWard = wardRepository.findById(toWardIdFinal)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -366,13 +525,14 @@ public class HouseholdService {
 
         household.setWardId(toWardIdFinal);
         household.setWard(toWard);
+        household.setHouseAddressDetails(dto.getToAddressDetails());
         household.setUpdatedAt(java.time.LocalDateTime.now());
         householdRepository.save(household);
 
-        HouseholdAddressChange entity = addressChangeMapper.toEntity(dto);
         entity.setHousehold(household);
-        entity.setFromAddressWard(fromWard);
         entity.setToAddressWard(toWard);
+        entity.setFromAddressDetails(fromAddressDetails);
+        entity.setToAddressDetails(dto.getToAddressDetails());
 
         HouseholdAddressChange saved = addressChangeRepository.save(entity);
         return addressChangeMapper.toDTO(saved);
@@ -396,7 +556,7 @@ public class HouseholdService {
         var household = householdRepository.findById(dto.getHouseholdId())
                 .orElseThrow(() -> new ResourceNotFoundException("Household not found with id: " + dto.getHouseholdId()));
 
-        com.soict.entity.person.Person fromPerson;
+        Person fromPerson;
         if (dto.getFromPersonId() == null) {
             var activeHeadOpt = membershipRepository.findActiveHeadByHouseholdId(household.getId());
             if (activeHeadOpt.isEmpty()) {
@@ -523,46 +683,47 @@ public class HouseholdService {
     }
 
     @Transactional
-    public com.soict.dto.household.HouseholdSplitDTO createHouseholdSplit(
-            com.soict.dto.household.HouseholdSplitCreateDTO dto
-    ) {
+    public HouseholdSplitDTO createHouseholdSplit(HouseholdSplitCreateDTO dto) {
         if (dto == null) throw new BusinessException("Payload is required");
         if (dto.getFromHouseholdId() == null) throw new BusinessException("fromHouseholdId is required");
-        if (dto.getSplitDate() == null) throw new BusinessException("splitDate is required");
         if (dto.getMembers() == null || dto.getMembers().isEmpty()) {
             throw new BusinessException("members must not be empty");
         }
 
-        var from = householdRepository.findById(dto.getFromHouseholdId())
-                .orElseThrow(() -> new ResourceNotFoundException("From household not found: " + dto.getFromHouseholdId()));
-
-        com.soict.entity.household.Household to;
-        if (dto.getToHouseholdId() != null) {
-            to = householdRepository.findById(dto.getToHouseholdId())
-                    .orElseThrow(() -> new ResourceNotFoundException("To household not found: " + dto.getToHouseholdId()));
-        } else {
-            if (dto.getNewHouseholdCode() == null || dto.getNewHouseholdCode().isBlank()) {
-                throw new BusinessException("newHouseholdCode is required when toHouseholdId is null");
-            }
-            if (householdRepository.existsByCode(dto.getNewHouseholdCode())) {
-                throw new BusinessException("Household code already exists: " + dto.getNewHouseholdCode());
-            }
-            to = new com.soict.entity.household.Household();
-            to.setCode(dto.getNewHouseholdCode().trim());
-            to.setWard(from.getWard());
-            to.setWardId(from.getWard() != null ? from.getWard().getId() : null);
-            to.setHouseAddressDetails(from.getHouseAddressDetails());
-            to = householdRepository.save(to);
+        if (dto.getNewHouseholdCode() == null || dto.getNewHouseholdCode().isBlank()) {
+            throw new BusinessException("newHouseholdCode is required");
         }
 
-        long headCount = dto.getMembers().stream().filter(m -> java.lang.Boolean.TRUE.equals(m.getIsHead())).count();
+        LocalDate splitDate = dto.getSplitDate();
+        if (splitDate == null) {
+            splitDate = LocalDate.now();
+        }
+
+        var from = householdRepository.findById(dto.getFromHouseholdId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "From household not found: " + dto.getFromHouseholdId()
+                ));
+
+        if (householdRepository.existsByCode(dto.getNewHouseholdCode())) {
+            throw new BusinessException("Household code already exists: " + dto.getNewHouseholdCode());
+        }
+
+        com.soict.entity.household.Household to = new com.soict.entity.household.Household();
+        to.setCode(dto.getNewHouseholdCode().trim());
+        to.setWard(from.getWard());
+        to.setWardId(from.getWard() != null ? from.getWard().getId() : null);
+        to.setHouseAddressDetails(from.getHouseAddressDetails());
+        to = householdRepository.save(to);
+
+        long headCount = dto.getMembers().stream()
+                .filter(m -> java.lang.Boolean.TRUE.equals(m.getIsHead()))
+                .count();
         if (headCount != 1) {
             throw new BusinessException("Exactly one member must be marked as head for the new household");
         }
 
-        java.time.LocalDate splitDate = dto.getSplitDate();
-        java.util.List<com.soict.entity.person.Person> persons = new java.util.ArrayList<>();
-        java.util.List<com.soict.entity.household.HouseholdMembership> fromMemberships = new java.util.ArrayList<>();
+        List<com.soict.entity.person.Person> persons = new java.util.ArrayList<>();
+        List<com.soict.entity.household.HouseholdMembership> fromMemberships = new java.util.ArrayList<>();
 
         for (com.soict.dto.household.HouseholdSplitMemberCreateDTO m : dto.getMembers()) {
             var p = personRepository.findById(m.getPersonId())
@@ -575,21 +736,18 @@ public class HouseholdService {
             if (!mem.getHousehold().getId().equals(from.getId())) {
                 throw new BusinessException("Person " + p.getId() + " does not belong to fromHousehold");
             }
-            if (mem.getStartDate() != null && splitDate.isBefore(mem.getStartDate())) {
-                throw new BusinessException("splitDate must be >= membership start date for person " + p.getId());
-            }
             persons.add(p);
             fromMemberships.add(mem);
         }
 
-        var split = new com.soict.entity.household.event.HouseholdSplit();
+        var split = new HouseholdSplit();
         split.setFromHousehold(from);
         split.setToHousehold(to);
         split.setSplitDate(splitDate);
         split.setNote(dto.getNote());
         split = householdSplitRepository.save(split);
 
-        java.util.List<com.soict.entity.household.event.HouseholdSplitMember> splitMembers = new java.util.ArrayList<>();
+        List<HouseholdSplitMember> splitMembers = new java.util.ArrayList<>();
         for (int i = 0; i < persons.size(); i++) {
             var p = persons.get(i);
             var oldMem = fromMemberships.get(i);
@@ -597,7 +755,7 @@ public class HouseholdService {
             oldMem.setEndDate(splitDate);
             membershipRepository.save(oldMem);
 
-            var newMem = new com.soict.entity.household.HouseholdMembership();
+            var newMem = new HouseholdMembership();
             newMem.setHousehold(to);
             newMem.setPerson(p);
             newMem.setStartDate(splitDate);
@@ -618,14 +776,16 @@ public class HouseholdService {
             p.setPermAddressWardId(to.getWardId());
             p.setPermAddressWard(to.getWard());
             p.setUpdatedAt(java.time.LocalDateTime.now());
+            p.setPermAddressDetails(to.getHouseAddressDetails());
             personRepository.save(p);
 
-            var sm = new com.soict.entity.household.event.HouseholdSplitMember();
+            var sm = new HouseholdSplitMember();
             sm.setHouseholdSplit(split);
             sm.setPerson(p);
             sm.setIsHead(isHead);
             splitMembers.add(sm);
         }
+
         householdSplitMemberRepository.saveAll(splitMembers);
 
         var out = householdSplitMapper.toDTO(split);
@@ -636,7 +796,8 @@ public class HouseholdService {
         return out;
     }
 
-    public java.util.List<com.soict.dto.household.HouseholdSplitDTO> getAllHouseholdSplits() {
+
+    public List<com.soict.dto.household.HouseholdSplitDTO> getAllHouseholdSplits() {
         return householdSplitRepository.findAll(Sort.by(Sort.Direction.DESC, "splitDate"))
                 .stream()
                 .map(s -> {
@@ -650,14 +811,14 @@ public class HouseholdService {
                 .toList();
     }
 
-    public java.util.List<com.soict.dto.household.HouseholdSplitMemberDTO> getAllHouseholdSplitMembers() {
+    public List<com.soict.dto.household.HouseholdSplitMemberDTO> getAllHouseholdSplitMembers() {
         return householdSplitMemberRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
                 .stream()
                 .map(householdSplitMemberMapper::toDTO)
                 .toList();
     }
 
-    public Page<com.soict.dto.household.HouseholdSplitDTO> getHouseholdSplitsPaginated(
+    public Page<HouseholdSplitDTO> getHouseholdSplitsPaginated(
             Pageable pageable,
             String fromHouseholdCode,
             String toHouseholdCode,
@@ -669,7 +830,7 @@ public class HouseholdService {
                 Sort.by(Sort.Direction.DESC, "splitDate"))
                 : pageable;
 
-        Specification<com.soict.entity.household.event.HouseholdSplit> spec =
+        Specification<HouseholdSplit> spec =
                 Specification.where(null);
 
         if (fromHouseholdCode != null && !fromHouseholdCode.isBlank()) {
@@ -704,14 +865,14 @@ public class HouseholdService {
         });
     }
 
-    public Page<com.soict.dto.household.HouseholdSplitMemberDTO> getHouseholdSplitMembersPaginated(
+    public Page<HouseholdSplitMemberDTO> getHouseholdSplitMembersPaginated(
             Pageable pageable,
             Integer splitId,
             String personName,
             String personIdNumber,
             Boolean isHead
     ) {
-        Specification<com.soict.entity.household.event.HouseholdSplitMember> spec =
+        Specification<HouseholdSplitMember> spec =
                 Specification.where(null);
 
         if (splitId != null) {
@@ -745,7 +906,7 @@ public class HouseholdService {
                 .map(householdSplitMemberMapper::toDTO);
     }
 
-    public com.soict.dto.household.HouseholdSplitDTO getHouseholdSplitById(Integer id) {
+    public HouseholdSplitDTO getHouseholdSplitById(Integer id) {
         var s = householdSplitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Household split not found: " + id));
         var dto = householdSplitMapper.toDTO(s);
@@ -756,13 +917,13 @@ public class HouseholdService {
         return dto;
     }
 
-    public com.soict.dto.household.HouseholdSplitMemberDTO getHouseholdSplitMemberById(Integer id) {
+    public HouseholdSplitMemberDTO getHouseholdSplitMemberById(Integer id) {
         var sm = householdSplitMemberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Household split member not found: " + id));
         return householdSplitMemberMapper.toDTO(sm);
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public void deleteHouseholdSplit(Integer id) {
         var s = householdSplitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Household split not found: " + id));
@@ -770,7 +931,7 @@ public class HouseholdService {
         householdSplitRepository.delete(s);
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public void deleteHouseholdSplitMember(Integer id) {
         if (!householdSplitMemberRepository.existsById(id)) {
             throw new ResourceNotFoundException("Household split member not found: " + id);

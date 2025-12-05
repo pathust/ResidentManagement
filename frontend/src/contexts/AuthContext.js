@@ -2,13 +2,15 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { authAPI } from "@/services/api";
+import { authAPI, locationAPI } from "@/services/api";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [provinces, setProvinces] = useState([]);
+  const [ethnicities, setEthnicities] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -19,6 +21,24 @@ export function AuthProvider({ children }) {
     }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    const utilManager = async () => {
+      if (user) {
+        if (provinces.length === 0) {
+          const provincesData = await locationAPI.getAllProvinces();
+          setProvinces(provincesData);
+        }
+
+        if (ethnicities.length === 0) {
+          const ethnicitiesData = await locationAPI.getAllEthnicities();
+          setEthnicities(ethnicitiesData);
+        }
+      }
+    };
+
+    utilManager();
+  }, [user]);
 
   const login = async (username, password) => {
     try {

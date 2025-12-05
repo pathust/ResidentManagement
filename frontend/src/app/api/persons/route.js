@@ -114,7 +114,7 @@ export async function POST(req) {
             return NextResponse.json({ error: errorData.detail || "Failed to add new person" }, { status: response.status });
         }
 
-        return NextResponse.status(201);
+        return NextResponse.json({ message: "Created" }, { status: 201 });
     }	catch (error) {
         console.error("Error during fetch:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

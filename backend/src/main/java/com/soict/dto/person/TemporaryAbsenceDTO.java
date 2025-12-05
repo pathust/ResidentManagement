@@ -30,7 +30,6 @@ public class TemporaryAbsenceDTO {
     private String permAddressWardName;
     private String tempAddressWardName;
 
-    @NotNull(message = "Start date is required")
     private LocalDate startDate;
     private LocalDate endDate;
 

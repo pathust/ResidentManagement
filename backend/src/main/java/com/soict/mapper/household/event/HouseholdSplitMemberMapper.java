@@ -1,4 +1,3 @@
-// src/main/java/com/soict/mapper/household/event/HouseholdSplitMemberMapper.java
 package com.soict.mapper.household.event;
 
 import com.soict.dto.household.HouseholdSplitMemberCreateDTO;

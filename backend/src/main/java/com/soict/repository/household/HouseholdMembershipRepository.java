@@ -26,4 +26,12 @@ public interface HouseholdMembershipRepository extends JpaRepository<HouseholdMe
     @Query("SELECT COUNT(hm) FROM HouseholdMembership hm " +
             "WHERE hm.household.id = :householdId AND hm.endDate IS NULL")
     Long countActiveMembers(@Param("householdId") Integer householdId);
+
+    @Query("SELECT COUNT(DISTINCT hm.household.id) FROM HouseholdMembership hm " +
+            "WHERE hm.endDate IS NULL")
+    Long countActiveHousehold();
+
+    @Query("SELECT COUNT(DISTINCT hm.household.id) FROM HouseholdMembership hm " +
+            "WHERE hm.household.ward.id = :wardId AND hm.endDate IS NULL")
+    Long countActiveHouseholdByWardId(@Param("wardId") Integer wardId);
 }
