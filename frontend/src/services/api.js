@@ -176,36 +176,6 @@ export const locationAPI = {
   }
 };
 
-export const feeAPI = {
-  getAll: async () => {
-    const response = await fetch('/api/fees', {
-      method: 'GET',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch fees');
-    }
-
-    return response.json();
-  },
-};
-
-export const rewardAPI = {
-  getAll: async () => {
-    const response = await fetch('/api/rewards', {
-      method: 'GET',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch rewards');
-    }
-
-    return response.json();
-  },
-};
-
 export const feeManagementAPI = {
   // Events
   getEvents: async () => {
