@@ -202,6 +202,8 @@ export const rewardAPI = {
       throw new Error('Failed to fetch rewards');
     }
 
-    return response.json();
+    const data = await response.json();
+
+    return data;
   },
 };

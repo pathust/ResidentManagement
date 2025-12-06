@@ -20,6 +20,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+import { authAPI } from "@/services/api"
 
 export default function AdminPage() {
   const router = useRouter();
@@ -56,6 +57,15 @@ export default function AdminPage() {
   const [rolePermList, setRolePermList] = useState([]);
   const [safeRPList, setSafeRPList] = useState([]);
   const [changed, setChanged] = useState(false);
+
+  const logout = async () => {
+    try {
+      await authAPI.logout();
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   // ---------------- LOAD MOCK DATA ----------------
   useEffect(() => {
@@ -170,7 +180,7 @@ export default function AdminPage() {
             icon={<LogoutOutlined />}
             danger
             type="primary"
-            onClick={() => router.push("/login")}
+            onClick={logout}
           >
             Đăng xuất
           </Button>

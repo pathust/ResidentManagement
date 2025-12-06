@@ -58,15 +58,21 @@ export default function NhanKhauPage() {
       title: "Họ và tên",
       dataIndex: "fullName",
       key: "fullName",
+      dataIndex: "fullName",
+      key: "fullName",
     },
     {
       title: "Ngày sinh",
+      dataIndex: "dateOfBirth",
+      key: "dateOfBirth",
       dataIndex: "dateOfBirth",
       key: "dateOfBirth",
       width: 120,
     },
     {
       title: "CMND/CCCD",
+      dataIndex: "idNumber",
+      key: "idNumber",
       dataIndex: "idNumber",
       key: "idNumber",
       width: 140,
@@ -78,6 +84,7 @@ export default function NhanKhauPage() {
       width: 120,
       render: (status) => {
         const color = status === "ALIVE" ? "green" : "orange";
+        const color = status === "ALIVE" ? "green" : "orange";
         return <Tag color={color}>{status}</Tag>;
       },
     },
@@ -85,6 +92,7 @@ export default function NhanKhauPage() {
       title: "Thao tác",
       key: "action",
       width: 150,
+      render: (_, record, index) => (
       render: (_, record, index) => (
         <Space>
           <Button
@@ -133,6 +141,7 @@ export default function NhanKhauPage() {
 
       <Table
         columns={columns}
+        dataSource={personData}
         dataSource={personData}
         pagination={{
           pageSize: 10,
