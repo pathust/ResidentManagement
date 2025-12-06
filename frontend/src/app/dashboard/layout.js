@@ -10,6 +10,8 @@ import {
   BarChartOutlined,
   BellOutlined,
   SearchOutlined,
+  WalletOutlined,
+  DollarOutlined
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,6 +45,16 @@ export default function DashboardLayout({ children }) {
       key: "/dashboard/tamtru",
       icon: <SwapOutlined />,
       label: "Tạm trú - Tạm vắng",
+    },
+    {
+      key: "/dashboard/quanlyphi",
+      icon: <DollarOutlined />,
+      label: "Quản lý Phí",
+    },
+    {
+      key: "/dashboard/quanlyquy",
+      icon: <WalletOutlined />,
+      label: "Quản lý Quỹ",
     },
     {
       key: "/dashboard/thongke",
