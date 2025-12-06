@@ -24,12 +24,12 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const utilManager = async () => {
       if (user) {
-        if (ulti === null) {
+        if (util === null) {
           const provincesData = await locationAPI.getAllProvinces();
           const ethnicitiesData = await locationAPI.getAllEthnicities();
           
           setUtil({
-            provinces,
+            provincesData,
             ethnicitiesData,
           });
         }
