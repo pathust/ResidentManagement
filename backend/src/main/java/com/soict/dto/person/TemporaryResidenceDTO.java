@@ -1,4 +1,3 @@
-// TemporaryResidenceDTO.java
 package com.soict.dto.person;
 
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +24,6 @@ public class TemporaryResidenceDTO {
     private Integer currentHouseholdId;
     private String currentHouseholdCode;
 
-    @NotNull(message = "Start date is required")
     private LocalDate startDate;
     private LocalDate endDate;
 

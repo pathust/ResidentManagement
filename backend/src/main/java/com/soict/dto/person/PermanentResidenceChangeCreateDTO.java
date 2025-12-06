@@ -27,7 +27,6 @@ public class PermanentResidenceChangeCreateDTO {
     @Size(max = 255)
     private String addressDetails;
 
-    @NotNull(message = "Start date is required")
     private LocalDate startDate;
 
     private String details;

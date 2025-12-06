@@ -1,4 +1,4 @@
--- Active: 1759857430738@@127.0.0.1@3306@mysql
+-- Active: 1759857430738@@127.0.0.1@3306@resident_management_db
 -- Drop database if exists
 DROP DATABASE IF EXISTS RESIDENT_MANAGEMENT_DB;
 
@@ -240,7 +240,7 @@ CREATE TABLE temporary_absence (
 CREATE TABLE permanent_residence_change (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     person_id INT NOT NULL,
-    current_household_id INT NOT NULL,
+    current_household_id INT NULL DEFAULT NULL,
     prev_address_ward_id INT NULL DEFAULT NULL,
     prev_address_details VARCHAR(255) NULL DEFAULT NULL,
     address_ward_id INT NOT NULL,
@@ -283,7 +283,7 @@ CREATE TABLE death_declare (
     declarer_id INT NOT NULL,
     date_of_declaration DATE NOT NULL,
     time_of_death DATETIME NULL,
-    last_permanent_residence_ward_id INT NOT NULL,
+    last_permanent_residence_ward_id INT NULL DEFAULT NULL,
     last_permanent_residence_details VARCHAR(255) NULL,
     note TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

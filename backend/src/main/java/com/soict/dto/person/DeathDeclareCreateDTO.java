@@ -14,18 +14,17 @@ import java.time.LocalDateTime;
 @Builder
 
 public class DeathDeclareCreateDTO {
-    //@NotBlank(message = "Person ID is required")
+    @NotNull(message = "Person ID is required")
     private Integer personId;
     private String idNumber;
+
     @NotNull(message = "Declarer ID is required")
     private Integer declarerId;
 
-    @NotNull(message = "Date of declaration is required")
     private LocalDate dateOfDeclaration;
 
     private LocalDateTime timeOfDeath;
 
-    @NotNull(message = "Last permanent residence ward is required")
     private Integer lastPermanentResidenceWardId;
 
     @Size(max = 255)
