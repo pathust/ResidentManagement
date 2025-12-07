@@ -40,7 +40,7 @@ const HouseholdDetailModal = ({ open, onClose, household, members }) => {
       width: 120,
       render: (_, r) =>
         r.isHouseholdHead ? (
-          <Tag color="green">Chủ hộ</Tag>
+          "Chủ hộ"
         ) : (
           r.relationToHead || "-"
         ),

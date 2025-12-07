@@ -4,8 +4,9 @@ import React from "react";
 import { Button, Table, Space, Typography, Tag, message } from "antd";
 import { PlusOutlined, EditOutlined, ScissorOutlined } from "@ant-design/icons";
 
-import { householdAPI } from "@/services/api";
+import { householdAPI } from "@/services/householdsAPI";
 import HouseholdDetailModal from "@/components/HouseholdDetailModal";
+import HouseholdAddModal from "@/components/HouseholdAddModal";
 
 const { Title } = Typography;
 
@@ -15,6 +16,8 @@ export default function HoKhauPage() {
 
   const [householdData, setHouseholdData] = React.useState([]);
   const [memberCache, setMemberCache] = React.useState({}); // map: { householdId → members[] }
+
+  const [isAddOpen, setIsAddOpen] = React.useState(false);
 
   React.useEffect(() => {
     fetchHouseholdList();
@@ -46,6 +49,15 @@ export default function HoKhauPage() {
       console.error(error);
       message.error("Không thể tải thông tin thành viên hộ khẩu");
       return [];
+    }
+  };
+
+  const onAddNewHousehold = async (values) => {
+    try {
+      await householdAPI.addOne(values);
+      await fetchHouseholdList();
+    } catch (error) {
+      throw new Error(error.message || "Không thể thêm hộ khẩu mới");
     }
   };
 
@@ -109,7 +121,10 @@ export default function HoKhauPage() {
         </Title>
 
         <Space>
-          <Button icon={<PlusOutlined />} type="primary">
+          <Button
+            icon={<PlusOutlined />} type="primary"
+            onClick={() => setIsAddOpen(true)}
+          >
             Thêm hộ khẩu
           </Button>
           <Button icon={<EditOutlined />}>Sửa hộ khẩu</Button>
@@ -134,6 +149,13 @@ export default function HoKhauPage() {
         onClose={() => setIsDetailOpen(false)}
         household={householdData[currentHousehold] || {}}
         members={memberCache[householdData[currentHousehold]?.id] || []}
+      />
+
+      {/* Modal thêm hộ khẩu */}
+      <HouseholdAddModal
+        open={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        onSubmit={onAddNewHousehold}
       />
     </div>
   );
