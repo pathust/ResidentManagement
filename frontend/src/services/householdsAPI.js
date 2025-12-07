@@ -1,6 +1,5 @@
 export const householdAPI = {
 	addOne: async (values) => {
-		console.log("Adding household with values:", values);
 		const response = await fetch('/api/households', {
 			method: 'POST',
 			credentials: 'include',

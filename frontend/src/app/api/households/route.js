@@ -78,11 +78,10 @@ export async function POST(req) {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
             },
             body: JSON.stringify(data),
         });
-
-        console.log("Response status:", `${SERVER_URL}/api/households/init`);
 
         if (!response.ok) {
             const errorData = await response.json();
