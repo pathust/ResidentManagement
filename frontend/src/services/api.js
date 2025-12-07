@@ -34,44 +34,6 @@ export const authAPI = {
   },
 };
 
-export const householdAPI = {
-  getAll: async (paging = null) => {
-    if (!paging) paging = {};
-    const params = new URLSearchParams(paging);
-
-    const paramsString = params.toString() ? `?${params.toString()}` : '';
-
-    const response = await fetch(`/api/households${paramsString}`, {
-      method: 'GET',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch households');
-    }
-
-    const data = await response.json();
-
-    return data;
-  },
-
-  getMembers: async (householdId, paging = null) => {
-    const response = await fetch(`/api/households/${householdId}/members`, {
-      method: 'GET',
-      credentials: 'include',
-    });
-
-    console.log("Fetching members for household ID:", householdId);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch household members');
-    }
-
-    const data = await response.json();
-    return data;
-  }
-};
-
 export const personAPI = {
   getAll: async () => {
     const response = await fetch('/api/persons', {

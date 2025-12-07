@@ -1,5 +1,6 @@
 export const householdAPI = {
 	addOne: async (values) => {
+		console.log("Adding household with values:", values);
 		const response = await fetch('/api/households', {
 			method: 'POST',
 			credentials: 'include',
@@ -46,6 +47,7 @@ export const householdAPI = {
       },
       body: JSON.stringify(values)
     });
+	
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to update household');
