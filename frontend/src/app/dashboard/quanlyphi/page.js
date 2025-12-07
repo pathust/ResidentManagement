@@ -54,7 +54,7 @@ export default function QuanLyPhiPage() {
       title: "Loại phí",
       dataIndex: "feeType",
       key: "feeType",
-      render: (feeType) => feeType?.name || "—",
+      render: (_, record) => record.feeTypeName || "—",
     },
     {
       title: "Ngày thu",
@@ -97,7 +97,7 @@ export default function QuanLyPhiPage() {
       title: "Người thu",
       dataIndex: "collectorUser",
       key: "collectorUser",
-      render: (user) => user?.username || "—",
+      render: (_, record) => record.collectorUsername || "—",
     },
     {
       title: "Thao tác",
@@ -128,13 +128,13 @@ export default function QuanLyPhiPage() {
       title: "Mã hộ",
       dataIndex: "household",
       key: "household",
-      render: (household) => household?.code || "—",
+      render: (_, record) => record.householdCode || "—",
     },
     {
       title: "Đợt thu",
       dataIndex: "collectionEvent",
       key: "collectionEvent",
-      render: (event) => event?.feeType?.name || "—",
+      render: (_, record) => record.collectionEventName || "—",
     },
     {
       title: "Số tiền (VNĐ)",
@@ -170,9 +170,9 @@ export default function QuanLyPhiPage() {
       render: (status) => {
         const statusConfig = {
           PENDING: { color: "warning", text: "Chưa nộp" },
-          PARTIAL: { color: "processing", text: "Nộp một phần" },
-          PAID: { color: "success", text: "Đã nộp" },
+          COMPLETED: { color: "success", text: "Đã nộp" },
         };
+          
         const config = statusConfig[status] || { color: "default", text: status };
         return <Tag color={config.color}>{config.text}</Tag>;
       },

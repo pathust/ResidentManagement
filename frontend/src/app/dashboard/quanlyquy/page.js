@@ -123,7 +123,7 @@ export default function QuanLyQuyPage() {
       title: "Quỹ",
       dataIndex: "fund",
       key: "fund",
-      render: (fund) => fund?.name || "—",
+      render: (_, record) => record.fundName || "—",
     },
     {
       title: "Loại giao dịch",
@@ -132,8 +132,10 @@ export default function QuanLyQuyPage() {
       width: 150,
       render: (type) => {
         const typeMap = {
-          INCOME: { color: "green", text: "Thu" },
-          EXPENSE: { color: "red", text: "Chi" },
+          INFLOW: { color: "green", text: "Thu" },
+          OUTFLOW: { color: "red", text: "Chi" },
+          TRANSFER_IN: { color: "blue", text: "Chuyển đến" },
+          TRANSFER_OUT: { color: "orange", text: "Chuyển đi" },
         };
         const config = typeMap[type] || { color: "default", text: type };
         return <Tag color={config.color}>{config.text}</Tag>;
@@ -145,7 +147,7 @@ export default function QuanLyQuyPage() {
       key: "amount",
       width: 150,
       render: (value, record) => {
-        const color = record.transactionType === "INCOME" ? "#3f8600" : "#cf1322";
+        const color = (record.transactionType === "INFLOW" || record.transactionType === "TRANSFER_IN") ? "#3f8600" : "#cf1322";
         return (
           <span style={{ color, fontWeight: "bold" }}>
             {value?.toLocaleString("vi-VN") || "0"}
@@ -163,7 +165,7 @@ export default function QuanLyQuyPage() {
       title: "Người thực hiện",
       dataIndex: "user",
       key: "user",
-      render: (user) => user?.username || "—",
+      render: (_, record) => record.username || "—",
     },
     {
       title: "Ghi chú",
@@ -195,7 +197,7 @@ export default function QuanLyQuyPage() {
       title: "Quỹ",
       dataIndex: "fund",
       key: "fund",
-      render: (fund) => fund?.name || "—",
+      render: (_, record) => record.fundName || "—",
     },
     {
       title: "Số tiền (VNĐ)",
@@ -234,8 +236,8 @@ export default function QuanLyQuyPage() {
       render: (status) => {
         const statusMap = {
           PENDING: { color: "warning", text: "Chờ duyệt" },
-          APPROVED: { color: "success", text: "Đã duyệt" },
-          REJECTED: { color: "error", text: "Từ chối" },
+          COMPLETED: { color: "success", text: "Đã hoàn thành" },
+          CANCELLED: { color: "error", text: "Đã hủy" },
         };
         const config = statusMap[status] || { color: "default", text: status };
         return <Tag color={config.color}>{config.text}</Tag>;
@@ -265,13 +267,13 @@ export default function QuanLyQuyPage() {
       title: "Từ quỹ",
       dataIndex: "sourceFund",
       key: "sourceFund",
-      render: (fund) => fund?.name || "—",
+      render: (_, record) => record.sourceFundName || "—",
     },
     {
       title: "Đến quỹ",
       dataIndex: "destFund",
       key: "destFund",
-      render: (fund) => fund?.name || "—",
+      render: (_, record) => record.destFundName || "—",
     },
     {
       title: "Số tiền (VNĐ)",
@@ -304,8 +306,8 @@ export default function QuanLyQuyPage() {
       render: (status) => {
         const statusMap = {
           PENDING: { color: "warning", text: "Chờ duyệt" },
-          APPROVED: { color: "success", text: "Đã duyệt" },
-          REJECTED: { color: "error", text: "Từ chối" },
+          COMPLETED: { color: "success", text: "Đã hoàn thành" },
+          CANCELLED: { color: "error", text: "Đã hủy" },
         };
         const config = statusMap[status] || { color: "default", text: status };
         return <Tag color={config.color}>{config.text}</Tag>;
@@ -328,11 +330,11 @@ export default function QuanLyQuyPage() {
     totalFunds: fundsData.length || 0,
     totalBalance: fundsData.reduce((sum, f) => sum + (f.balance || 0), 0),
     totalIncome: transactionsData
-      .filter((t) => t.transactionType === "INCOME")
-      .reduce((sum, t) => sum + (t.amount || 0), 0),
+        .filter((t) => t.transactionType === "INFLOW" || t.transactionType === "TRANSFER_IN")
+        .reduce((sum, t) => sum + (t.amount || 0), 0),
     totalExpense: transactionsData
-      .filter((t) => t.transactionType === "EXPENSE")
-      .reduce((sum, t) => sum + (t.amount || 0), 0),
+        .filter((t) => t.transactionType === "OUTFLOW" || t.transactionType === "TRANSFER_OUT")
+        .reduce((sum, t) => sum + (t.amount || 0), 0),
   };
 
   const tabItems = [
