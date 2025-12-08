@@ -444,3 +444,165 @@ export const fundManagementAPI = {
     return response.json();
   },
 };
+
+// Thêm vào cuối file api.js
+
+export const temporaryResidenceAPI = {
+  getAll: async (filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const paramsString = params.toString() ? `?${params.toString()}` : '';
+    
+    const response = await fetch(`/api/persons/temporary-residences${paramsString}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch temporary residences');
+    }
+
+    return response.json();
+  },
+
+  getById: async (id) => {
+    const response = await fetch(`/api/persons/temporary-residences/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch temporary residence');
+    }
+
+    return response.json();
+  },
+
+  create: async (data) => {
+    const response = await fetch('/api/persons/temporary-residences', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create temporary residence');
+    }
+
+    return response.json();
+  },
+
+  end: async (id, data) => {
+    const response = await fetch(`/api/persons/temporary-residences/${id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to end temporary residence');
+    }
+
+    return response.json();
+  },
+
+  delete: async (id) => {
+    const response = await fetch(`/api/persons/temporary-residences/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete temporary residence');
+    }
+
+    return response.status === 200;
+  },
+};
+
+export const temporaryAbsenceAPI = {
+  getAll: async (filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const paramsString = params.toString() ? `?${params.toString()}` : '';
+    
+    const response = await fetch(`/api/persons/temporary-absences${paramsString}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch temporary absences');
+    }
+
+    return response.json();
+  },
+
+  getById: async (id) => {
+    const response = await fetch(`/api/persons/temporary-absences/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch temporary absence');
+    }
+
+    return response.json();
+  },
+
+  create: async (data) => {
+    const response = await fetch('/api/persons/temporary-absences', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create temporary absence');
+    }
+
+    return response.json();
+  },
+
+  end: async (id, data) => {
+    const response = await fetch(`/api/persons/temporary-absences/${id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to end temporary absence');
+    }
+
+    return response.json();
+  },
+
+  delete: async (id) => {
+    const response = await fetch(`/api/persons/temporary-absences/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete temporary absence');
+    }
+
+    return response.status === 200;
+  },
+};
