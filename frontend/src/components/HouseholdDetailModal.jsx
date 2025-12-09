@@ -1,14 +1,32 @@
 "use client";
 
-import React from "react";
-import { Modal, Table, Tag } from "antd";
+import React, { useState, useMemo } from "react";
+import { Modal, Table, Tag, Button, Input, Space } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+
+import SplitHouseholdModal from "./SplitHouseholdModal";
 
 const HouseholdDetailModal = ({ open, onClose, household, members }) => {
-  const memberColumns = [
+  const [mode, setMode] = useState(null); // "remove", "split", "changeHead" or null
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [searchText, setSearchText] = useState("");
+
+  const [splitModalOpen, setSplitModalOpen] = useState(false);
+  const [splitMembers, setSplitMembers] = useState([]);
+
+  const filteredMembers = useMemo(() => {
+    if (!searchText) return members;
+    return members.filter((m) =>
+      m.fullName.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [searchText, members]);
+
+  const columns = [
     {
       title: "Họ và tên",
       dataIndex: "fullName",
       key: "fullName",
+      width: 200,
     },
     {
       title: "Ngày sinh",
@@ -37,53 +55,111 @@ const HouseholdDetailModal = ({ open, onClose, household, members }) => {
     {
       title: "Vai trò",
       key: "isHouseholdHead",
-      width: 120,
-      render: (_, r) =>
-        r.isHouseholdHead ? (
-          <Tag color="green">Chủ hộ</Tag>
-        ) : (
-          r.relationToHead || "-"
-        ),
+      width: 100,
+      render: (_, r) => (r.isHouseholdHead ? "Chủ hộ" : r.relationToHead || "-"),
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      width: 120,
+      width: 100,
       render: (status) => (
         <Tag color={status === "ACTIVE" ? "blue" : "orange"}>{status}</Tag>
       ),
     },
   ];
 
+  const rowSelection =
+    mode !== null
+      ? {
+          type: mode === "changeHead" ? "radio" : "checkbox",
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys),
+        }
+      : undefined;
+  
+  const handleConfirm = () => {
+    console.log("Confirmed action:", mode, "on members:", selectedRowKeys);
+
+    if (mode === "split") {
+      const membersToSplit = members.filter((m) =>
+        selectedRowKeys.includes(m.membershipId)
+      );
+      setSplitMembers(membersToSplit);
+      setSplitModalOpen(true);
+    }
+
+    setMode(null);
+    setSelectedRowKeys([]);
+  }
+
+  const handleCancel = () => {
+    setMode(null);
+    setSelectedRowKeys([]);
+  }
+
   return (
     <Modal
       title="Thông tin hộ khẩu"
       open={open}
-      onCancel={onClose}
+      onCancel={() => {
+        setMode(null);
+        setSelectedRowKeys([]);
+        onClose();
+      }}
       footer={null}
       width={900}
       centered
       destroyOnHidden={true}
     >
+      {/* Household info */}
       <div className="mb-4">
         <p><strong>Mã hộ khẩu:</strong> {household.code}</p>
         <p>
-          <strong>Địa chỉ:</strong>{" "}
-          {household.houseAddressDetails}, {household.wardName},{" "}
-          {household.provinceName}
+          <strong>Địa chỉ:</strong> {household.houseAddressDetails}, {" "}
+          {household.wardName}, {household.provinceName}
         </p>
         <p><strong>Ghi chú:</strong> {household.notes || "—"}</p>
       </div>
 
-      <h3 className="font-semibold text-lg mb-3">Danh sách thành viên</h3>
+      {/* Search bar */}
+      <Input
+        placeholder="Tìm kiếm theo tên..."
+        prefix={<SearchOutlined />}
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        className="mb-3"
+      />
 
       <Table
-        columns={memberColumns}
-        dataSource={members}
+        columns={columns}
+        dataSource={filteredMembers}
         rowKey="membershipId"
         pagination={false}
         size="small"
+        scroll={{ y: 250, x: undefined }}
+        rowSelection={rowSelection}
+      />
+
+      {/* Action bar */}
+      {mode === null ? (
+        <div className="mt-3 flex justify-end gap-2">
+          <Button onClick={() => setMode("changeHead")}>Đổi chủ hộ</Button>
+          <Button onClick={() => setMode("remove")}>Gỡ bỏ thành viên</Button>
+          <Button onClick={() => setMode("split")}>Tách hộ khẩu</Button>
+        </div>
+      ) : (
+        <div className="mt-3 flex justify-end gap-2">
+          <Button onClick={handleCancel}>Hủy bỏ</Button>
+          <Button onClick={handleConfirm} type="primary">Xác nhận</Button>
+        </div>
+      )}
+
+      <SplitHouseholdModal
+        open={splitModalOpen}
+        onClose={() => { setSplitModalOpen(false); handleCancel(); }}
+        household={household}
+        selectedMembers={splitMembers}
       />
     </Modal>
   );

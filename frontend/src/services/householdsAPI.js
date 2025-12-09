@@ -46,6 +46,7 @@ export const householdAPI = {
       },
       body: JSON.stringify(values)
     });
+	
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to update household');
@@ -89,8 +90,6 @@ export const householdAPI = {
       method: 'GET',
       credentials: 'include',
     });
-
-    console.log("Fetching members for household ID:", householdId);
 
     if (!response.ok) {
       throw new Error('Failed to fetch household members');

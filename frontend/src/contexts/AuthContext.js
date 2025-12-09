@@ -9,8 +9,7 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [provinces, setProvinces] = useState([]);
-  const [ethnicities, setEthnicities] = useState([]);
+  const [util, setUtil] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -25,14 +24,14 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const utilManager = async () => {
       if (user) {
-        if (provinces.length === 0) {
+        if (util === null) {
           const provincesData = await locationAPI.getAllProvinces();
-          setProvinces(provincesData);
-        }
-
-        if (ethnicities.length === 0) {
           const ethnicitiesData = await locationAPI.getAllEthnicities();
-          setEthnicities(ethnicitiesData);
+          
+          setUtil({
+            provincesData,
+            ethnicitiesData,
+          });
         }
       }
     };
@@ -67,7 +66,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, util }}>
       {children}
     </AuthContext.Provider>
   );
