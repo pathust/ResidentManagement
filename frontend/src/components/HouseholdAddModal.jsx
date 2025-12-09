@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   Form,
@@ -8,6 +8,7 @@ import {
   message,
 } from "antd";
 import PersonSearchModal from "./PersonSearchModal";
+import ConfirmModal from "./ConfirmModal";
 import { useAuth } from "@/contexts/AuthContext";
 
 const HouseholdAddModal = ({ open, onClose, onSubmit }) => {
@@ -178,66 +179,68 @@ const HouseholdAddModal = ({ open, onClose, onSubmit }) => {
         <Form form={form} layout="vertical">
           <h3 className="font-semibold text-lg border-b pb-1 mb-3">Thông tin chung</h3>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <Form.Item label="Mã hộ khẩu" name="code" rules={[{ required: true, message: "Nhập mã hộ khẩu" }]}>
-              <Input placeholder="HK123" />
-            </Form.Item>
+          <div className="grid grid-cols-2 gap-8 mb-4">
+            <div className="col-span-1 flex-col gap-4">
+              <Form.Item label="Mã hộ khẩu" name="code" rules={[{ required: true, message: "Nhập mã hộ khẩu" }]}>
+                <Input placeholder="HK123" />
+              </Form.Item>
 
-            <div className="mb-4">
-              <p className="text-sm font-medium mb-2">Địa chỉ</p>
-              <div className="grid grid-cols-3 gap-4">
-                <Form.Item 
-                  label="Tỉnh/Thành phố" 
-                  name="provinceId"
-                  rules={[{ required: true, message: "Vui lòng chọn tỉnh/thành phố" }]}
-                >
-                  <Select
-                    placeholder="Chọn tỉnh/thành"
-                    onChange={handleProvinceChange}
-                    showSearch
-                    filterOption={(input, option) =>
-                      option.children.toLowerCase().includes(input.toLowerCase())
-                    }
+              <Form.Item label="Ghi chú" name="notes">
+                <Input.TextArea rows={2} placeholder="Ghi chú thêm..." />
+              </Form.Item>
+            </div>
+
+            <div className="col-span-1">
+              <div className="flex-col gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Form.Item 
+                    label="Tỉnh/Thành phố" 
+                    name="provinceId"
+                    rules={[{ required: true, message: "Vui lòng chọn tỉnh/thành phố" }]}
                   >
-                    {provinces.map(prov => (
-                      <Select.Option key={prov.id} value={prov.id}>
-                        {prov.name}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-  
-                <Form.Item 
-                  label="Phường/Xã" 
-                  name="wardId"
-                  rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
-                >
-                  <Select
-                    placeholder="Chọn phường/xã"
-                    showSearch
-                    filterOption={(input, option) =>
-                      option.children.toLowerCase().includes(input.toLowerCase())
-                    }
-                    disabled={!form.getFieldValue('provinceId')}
+                    <Select
+                      placeholder="Chọn tỉnh/thành"
+                      onChange={handleProvinceChange}
+                      showSearch
+                      filterOption={(input, option) =>
+                        option.children.toLowerCase().includes(input.toLowerCase())
+                      }
+                    >
+                      {provinces.map(prov => (
+                        <Select.Option key={prov.id} value={prov.id}>
+                          {prov.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+    
+                  <Form.Item 
+                    label="Phường/Xã" 
+                    name="wardId"
+                    rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
                   >
-                    {Wards.map(ward => (
-                      <Select.Option key={ward.id} value={ward.id}>
-                        {ward.name}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item>
+                    <Select
+                      placeholder="Chọn phường/xã"
+                      showSearch
+                      filterOption={(input, option) =>
+                        option.children.toLowerCase().includes(input.toLowerCase())
+                      }
+                      disabled={!form.getFieldValue('provinceId')}
+                    >
+                      {Wards.map(ward => (
+                        <Select.Option key={ward.id} value={ward.id}>
+                          {ward.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </div>
   
                 <Form.Item label="Chi tiết địa chỉ" name="houseAddressDetails">
-                  <Input placeholder="Số nhà, đường..." />
+                  <Input.TextArea placeholder="Số nhà, đường..." />
                 </Form.Item>
               </div>
             </div>
-  
-
-            <Form.Item label="Ghi chú" name="notes">
-              <Input.TextArea rows={2} placeholder="Ghi chú thêm..." />
-            </Form.Item>
           </div>
         </Form>
 
@@ -291,20 +294,17 @@ const HouseholdAddModal = ({ open, onClose, onSubmit }) => {
       />
 
       {/* Shared small confirm modal */}
-      <Modal
+      <ConfirmModal
         open={confirmOpen}
         onCancel={handleConfirmNo}
-        onOk={handleConfirmYes}
-        okText="Đồng ý"
-        cancelText="Hủy"
-        centered
-        width={360}
-        destroyOnHidden
-      >
-        {confirmContext === "remove_member" && <p>Bạn có chắc muốn xóa thành viên này?</p>}
-        {confirmContext === "submit_form" && <p>Bạn có chắc muốn gửi thông tin hộ khẩu?</p>}
-        {confirmContext === "close_modal" && <p>Bạn có chắc muốn đóng? Mọi dữ liệu sẽ bị mất.</p>}
-      </Modal>
+        onConfirm={handleConfirmYes}
+        message={
+          confirmContext === "remove_member" ? "Bạn có chắc muốn xóa thành viên này?" :
+          confirmContext === "submit_form" ? "Bạn có chắc muốn gửi thông tin hộ khẩu?" :
+          confirmContext === "close_modal" ? "Bạn có chắc muốn đóng? Mọi dữ liệu sẽ bị mất." :
+          ""
+        }
+      />
     </>
   );
 };

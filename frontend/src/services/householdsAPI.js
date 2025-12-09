@@ -91,8 +91,6 @@ export const householdAPI = {
       credentials: 'include',
     });
 
-    console.log("Fetching members for household ID:", householdId);
-
     if (!response.ok) {
       throw new Error('Failed to fetch household members');
     }

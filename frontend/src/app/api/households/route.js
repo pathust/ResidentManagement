@@ -71,7 +71,6 @@ export async function POST(req) {
     }
 
     const data = await req.json();
-    console.log(JSON.stringify(data));
 
     try {
         const response = await fetch(`${SERVER_URL}/api/households/init`, {
