@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Handle GET requests to fetch fee collection data
-export async function GET(req) {
+export async function PUT(req, { params }) {
     const SERVER_URL = process.env.SERVER_URL || "http://localhost:8080";
 
     if (!req.cookies.get("access_token")) {
@@ -9,18 +8,22 @@ export async function GET(req) {
     }
 
     const token = req.cookies.get("access_token")?.value || "";
+    const { id } = params;
+    const body = await req.json();
 
     try {
-        const response = await fetch(`${SERVER_URL}/api/fees`, {
-            method: "GET",
+        const response = await fetch(`${SERVER_URL}/api/funds/expenses/${id}`, {
+            method: "PUT",
             headers: {
+                "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`,
             },
+            body: JSON.stringify(body),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            return NextResponse.json({ error: errorData.detail || "Failed to get fee data" }, { status: response.status });
+            return NextResponse.json({ error: errorData.detail || "Failed to update expense" }, { status: response.status });
         }
 
         const data = await response.json();

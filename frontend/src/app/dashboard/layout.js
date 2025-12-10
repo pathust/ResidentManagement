@@ -10,8 +10,8 @@ import {
   BarChartOutlined,
   BellOutlined,
   SearchOutlined,
-  DollarOutlined,
-  GiftOutlined,
+  WalletOutlined,
+  DollarOutlined
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,14 +47,14 @@ export default function DashboardLayout({ children }) {
       label: "Tạm trú - Tạm vắng",
     },
     {
-      key: "/dashboard/thuphidongop",
+      key: "/dashboard/quanlyphi",
       icon: <DollarOutlined />,
-      label: "Thu phí & Đóng góp",
+      label: "Quản lý Phí",
     },
     {
-      key: "/dashboard/capphatthuong",
-      icon: <GiftOutlined />,
-      label: "Cấp phát Phần thưởng",
+      key: "/dashboard/quanlyquy",
+      icon: <WalletOutlined />,
+      label: "Quản lý Quỹ",
     },
     {
       key: "/dashboard/thongke",

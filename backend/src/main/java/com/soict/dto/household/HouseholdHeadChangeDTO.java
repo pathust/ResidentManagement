@@ -21,7 +21,6 @@ public class HouseholdHeadChangeDTO {
     @NotNull
     private Integer toPersonId;
 
-    @NotNull
     private LocalDate changeDate;
 
     private LocalDateTime createdAt;

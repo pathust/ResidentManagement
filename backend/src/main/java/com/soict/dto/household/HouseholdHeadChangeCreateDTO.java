@@ -19,6 +19,5 @@ public class HouseholdHeadChangeCreateDTO {
     @NotNull
     private Integer toPersonId;
 
-    @NotNull
     private LocalDate changeDate;
 }
