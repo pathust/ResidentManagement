@@ -138,34 +138,497 @@ export const locationAPI = {
   }
 };
 
-export const feeAPI = {
-  getAll: async () => {
-    const response = await fetch('/api/fees', {
+export const feeManagementAPI = {
+  // Events
+  getEvents: async () => {
+    const response = await fetch('/api/fees/events', {
       method: 'GET',
       credentials: 'include',
     });
+    if (!response.ok) throw new Error('Failed to fetch events');
+    return response.json();
+  },
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch fees');
-    }
+  getEventById: async (id) => {
+    const response = await fetch(`/api/fees/events/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch event');
+    return response.json();
+  },
 
+  createEvent: async (data) => {
+    const response = await fetch('/api/fees/events', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create event');
+    return response.json();
+  },
+
+  updateEvent: async (id, data) => {
+    const response = await fetch(`/api/fees/events/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to update event');
+    return response.json();
+  },
+
+  deleteEvent: async (id) => {
+    const response = await fetch(`/api/fees/events/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to delete event');
+    return response.json();
+  },
+
+  // Payments
+  getPayments: async () => {
+    const response = await fetch('/api/fees/payments', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch payments');
+    return response.json();
+  },
+
+  getPaymentById: async (id) => {
+    const response = await fetch(`/api/fees/payments/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch payment');
+    return response.json();
+  },
+
+  createPayment: async (data) => {
+    const response = await fetch('/api/fees/payments', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create payment');
+    return response.json();
+  },
+
+  updatePayment: async (id, data) => {
+    const response = await fetch(`/api/fees/payments/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to update payment');
+    return response.json();
+  },
+
+  // Fee Types
+  getFeeTypes: async () => {
+    const response = await fetch('/api/fees/types', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch fee types');
+    return response.json();
+  },
+
+  getFeeTypeById: async (id) => {
+    const response = await fetch(`/api/fees/types/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch fee type');
+    return response.json();
+  },
+
+  createFeeType: async (data) => {
+    const response = await fetch('/api/fees/types', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create fee type');
+    return response.json();
+  },
+
+  updateFeeType: async (id, data) => {
+    const response = await fetch(`/api/fees/types/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to update fee type');
+    return response.json();
+  },
+
+  deleteFeeType: async (id) => {
+    const response = await fetch(`/api/fees/types/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to delete fee type');
     return response.json();
   },
 };
 
-export const rewardAPI = {
-  getAll: async () => {
-    const response = await fetch('/api/rewards', {
+export const fundManagementAPI = {
+  // Funds
+  getFunds: async () => {
+    const response = await fetch('/api/funds', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch funds');
+    return response.json();
+  },
+
+  getFundById: async (id) => {
+    const response = await fetch(`/api/funds/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch fund');
+    return response.json();
+  },
+
+  createFund: async (data) => {
+    const response = await fetch('/api/funds', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create fund');
+    return response.json();
+  },
+
+  updateFund: async (id, data) => {
+    const response = await fetch(`/api/funds/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to update fund');
+    return response.json();
+  },
+
+  deleteFund: async (id) => {
+    const response = await fetch(`/api/funds/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to delete fund');
+    return response.json();
+  },
+
+  // Expenses
+  getExpenses: async () => {
+    const response = await fetch('/api/funds/expenses', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch expenses');
+    return response.json();
+  },
+
+  createExpense: async (data) => {
+    const response = await fetch('/api/funds/expenses', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create expense');
+    return response.json();
+  },
+
+  updateExpense: async (id, data) => {
+    const response = await fetch(`/api/funds/expenses/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to update expense');
+    return response.json();
+  },
+
+  // Transactions
+  getTransactions: async () => {
+    const response = await fetch('/api/funds/transactions', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch transactions');
+    return response.json();
+  },
+
+  createTransaction: async (data) => {
+    const response = await fetch('/api/funds/transactions', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create transaction');
+    return response.json();
+  },
+
+  // Transfers
+  getTransfers: async () => {
+    const response = await fetch('/api/funds/transfers', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch transfers');
+    return response.json();
+  },
+
+  createTransfer: async (data) => {
+    const response = await fetch('/api/funds/transfers', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create transfer');
+    return response.json();
+  },
+};
+
+// Thêm vào cuối file api.js
+
+export const temporaryResidenceAPI = {
+  getAll: async (filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const paramsString = params.toString() ? `?${params.toString()}` : '';
+    
+    const response = await fetch(`/api/persons/temporary-residences${paramsString}`, {
       method: 'GET',
       credentials: 'include',
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch rewards');
+      throw new Error('Failed to fetch temporary residences');
     }
 
     const data = await response.json();
 
     return data;
+  },
+
+  getById: async (id) => {
+    const response = await fetch(`/api/persons/temporary-residences/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch temporary residence');
+    }
+
+    return response.json();
+  },
+
+  create: async (data) => {
+    const response = await fetch('/api/persons/temporary-residences', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create temporary residence');
+    }
+
+    return response.json();
+  },
+
+  end: async (id, data) => {
+    const response = await fetch(`/api/persons/temporary-residences/${id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to end temporary residence');
+    }
+
+    return response.json();
+  },
+
+  delete: async (id) => {
+    const response = await fetch(`/api/persons/temporary-residences/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete temporary residence');
+    }
+
+    return response.status === 200;
+  },
+};
+
+export const temporaryAbsenceAPI = {
+  getAll: async (filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const paramsString = params.toString() ? `?${params.toString()}` : '';
+    
+    const response = await fetch(`/api/persons/temporary-absences${paramsString}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch temporary absences');
+    }
+
+    return response.json();
+  },
+
+  getById: async (id) => {
+    const response = await fetch(`/api/persons/temporary-absences/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch temporary absence');
+    }
+
+    return response.json();
+  },
+
+  create: async (data) => {
+    const response = await fetch('/api/persons/temporary-absences', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create temporary absence');
+    }
+
+    return response.json();
+  },
+
+  end: async (id, data) => {
+    const response = await fetch(`/api/persons/temporary-absences/${id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to end temporary absence');
+    }
+
+    return response.json();
+  },
+
+  delete: async (id) => {
+    const response = await fetch(`/api/persons/temporary-absences/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete temporary absence');
+    }
+
+    return response.status === 200;
+  },
+};
+
+export const deathDeclareAPI = {
+  getAll: async (filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const paramsString = params.toString() ? `?${params.toString()}` : '';
+    
+    const response = await fetch(`/api/persons/death-declares${paramsString}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch death declares');
+    }
+
+    return response.json();
+  },
+
+  getById: async (id) => {
+    const response = await fetch(`/api/persons/death-declares/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch death declare');
+    }
+
+    return response.json();
+  },
+
+  create: async (data) => {
+    const response = await fetch('/api/persons/death-declares', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create death declare');
+    }
+
+    return response.json();
+  },
+
+  delete: async (id) => {
+    const response = await fetch(`/api/persons/death-declares/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete death declare');
+    }
+
+    return response.status === 200;
   },
 };

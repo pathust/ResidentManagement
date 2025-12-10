@@ -497,7 +497,7 @@ public class HouseholdService {
         if (dto == null) throw new BusinessException("Payload is required");
         if (dto.getHouseholdId() == null) throw new BusinessException("householdId is required");
         if (dto.getToAddressWardId() == null) throw new BusinessException("toAddressWardId is required");
-        if (dto.getChangeDate() == null) throw new BusinessException("changeDate is required");
+        // if (dto.getChangeDate() == null) throw new BusinessException("changeDate is required");
 
         Household household = householdRepository.findById(dto.getHouseholdId())
                 .orElseThrow(() -> new ResourceNotFoundException("Household not found with id: " + dto.getHouseholdId()));
@@ -533,7 +533,11 @@ public class HouseholdService {
         entity.setToAddressWard(toWard);
         entity.setFromAddressDetails(fromAddressDetails);
         entity.setToAddressDetails(dto.getToAddressDetails());
-
+        if (dto.getChangeDate() == null) {
+            entity.setChangeDate(LocalDate.now());
+        } else {
+            entity.setChangeDate(dto.getChangeDate());
+        }
         HouseholdAddressChange saved = addressChangeRepository.save(entity);
         return addressChangeMapper.toDTO(saved);
     }
@@ -551,7 +555,7 @@ public class HouseholdService {
         if (dto == null) throw new BusinessException("Payload is required");
         if (dto.getHouseholdId() == null) throw new BusinessException("householdId is required");
         if (dto.getToPersonId() == null) throw new BusinessException("toPersonId is required");
-        if (dto.getChangeDate() == null) throw new BusinessException("changeDate is required");
+        // if (dto.getChangeDate() == null) throw new BusinessException("changeDate is required");
 
         var household = householdRepository.findById(dto.getHouseholdId())
                 .orElseThrow(() -> new ResourceNotFoundException("Household not found with id: " + dto.getHouseholdId()));
@@ -613,7 +617,11 @@ public class HouseholdService {
         entity.setHousehold(household);
         entity.setFromPerson(fromPerson);
         entity.setToPerson(toPerson);
-
+        if (dto.getChangeDate() == null) {
+            entity.setChangeDate(LocalDate.now());
+        } else {
+            entity.setChangeDate(dto.getChangeDate());
+        }
         var saved = householdHeadChangeRepository.save(entity);
         return householdHeadChangeMapper.toDTO(saved);
     }

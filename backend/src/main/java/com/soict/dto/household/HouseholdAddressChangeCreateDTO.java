@@ -24,6 +24,5 @@ public class HouseholdAddressChangeCreateDTO {
     @Size(max = 255)
     private String toAddressDetails;
 
-    @NotNull
     private LocalDate changeDate;
 }
