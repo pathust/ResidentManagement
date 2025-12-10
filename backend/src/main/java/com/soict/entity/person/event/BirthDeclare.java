@@ -4,6 +4,7 @@ import com.soict.entity.person.Person;
 import com.soict.entity.location.Ward;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,6 +55,7 @@ public class BirthDeclare {
     @Column(name = "relation_with_declarer", nullable = false, length = 45)
     private String relationWithDeclarer;
 
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 

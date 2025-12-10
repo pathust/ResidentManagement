@@ -5,6 +5,7 @@ import com.soict.entity.household.Household;
 import com.soict.entity.location.Ward;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,6 +55,7 @@ public class TemporaryAbsence {
     @Column(name = "temp_address_details")
     private String tempAddressDetails;
 
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
