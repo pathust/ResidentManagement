@@ -6,10 +6,12 @@ import { SearchOutlined } from "@ant-design/icons";
 
 import SplitHouseholdModal from "./SplitHouseholdModal";
 
+import { householdsAPI } from "@/services/householdsAPI";
+
 const HouseholdDetailModal = ({ open, onClose, household, members }) => {
   const [mode, setMode] = useState(null); // "remove", "split", "changeHead" or null
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState(""); 
 
   const [splitModalOpen, setSplitModalOpen] = useState(false);
   const [splitMembers, setSplitMembers] = useState([]);
@@ -78,7 +80,7 @@ const HouseholdDetailModal = ({ open, onClose, household, members }) => {
         }
       : undefined;
   
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     console.log("Confirmed action:", mode, "on members:", selectedRowKeys);
 
     if (mode === "split") {
@@ -87,10 +89,22 @@ const HouseholdDetailModal = ({ open, onClose, household, members }) => {
       );
       setSplitMembers(membersToSplit);
       setSplitModalOpen(true);
+    } else if (mode === "remove") {
+      // Implement remove logic here
+    } else if (mode === "changeHead") {
+      try {
+        const newHeadId = selectedRowKeys[0];
+        console.log("Changing household head to member ID:", newHeadId, household.id);
+        await householdsAPI.headChange(household.id, newHeadId);
+      }
+      catch (error) {
+        console.error("Error changing household head:", error);
+      }
     }
 
     setMode(null);
     setSelectedRowKeys([]);
+    onClose();
   }
 
   const handleCancel = () => {
