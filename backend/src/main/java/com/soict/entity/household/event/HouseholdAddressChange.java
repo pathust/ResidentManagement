@@ -4,6 +4,7 @@ import com.soict.entity.household.Household;
 import com.soict.entity.location.Ward;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,6 +42,8 @@ public class HouseholdAddressChange {
     @Column(name = "change_date", nullable = false)
     private LocalDate changeDate;
 
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
 }
