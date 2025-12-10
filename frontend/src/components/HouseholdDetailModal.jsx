@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import { Modal, Table, Tag, Button, Input, Space } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 
-import SplitHouseholdModal from "./SplitHouseholdModal";
+import HouseholdSplitModal from "./HouseholdSplitModal";
 
 import { householdsAPI } from "@/services/householdsAPI";
 
@@ -96,15 +96,14 @@ const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) =>
         const newHeadId = selectedRowKeys[0];
         await householdsAPI.headChange(household.id, newHeadId);
         refresh(household.id);
+        setMode(null);
+        setSelectedRowKeys([]);
+        onClose();
       }
       catch (error) {
         console.error("Error changing household head:", error);
       }
     }
-
-    setMode(null);
-    setSelectedRowKeys([]);
-    onClose();
   }
 
   const handleCancel = () => {
@@ -169,7 +168,7 @@ const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) =>
         </div>
       )}
 
-      <SplitHouseholdModal
+      <HouseholdSplitModal
         open={splitModalOpen}
         onClose={() => { setSplitModalOpen(false); handleCancel(); }}
         household={household}

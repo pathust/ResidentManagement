@@ -153,5 +153,21 @@ export const householdsAPI = {
 			console.error('Error in headChange:', error);
 			throw error;
 		}
+	},
+	splits: async (payload) => {
+		const response = await fetch('/api/households/splits', {
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(payload)
+		});
+		if (!response.ok) {
+			const errorData = await response.json();
+			throw new Error(errorData.error || 'Failed to split household');
+		}
+		const data = await response.json();
+		return data;
 	}
 };
