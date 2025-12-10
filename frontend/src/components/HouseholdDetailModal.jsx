@@ -8,7 +8,7 @@ import SplitHouseholdModal from "./SplitHouseholdModal";
 
 import { householdsAPI } from "@/services/householdsAPI";
 
-const HouseholdDetailModal = ({ open, onClose, household, members }) => {
+const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) => {
   const [mode, setMode] = useState(null); // "remove", "split", "changeHead" or null
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [searchText, setSearchText] = useState(""); 
@@ -94,8 +94,8 @@ const HouseholdDetailModal = ({ open, onClose, household, members }) => {
     } else if (mode === "changeHead") {
       try {
         const newHeadId = selectedRowKeys[0];
-        console.log("Changing household head to member ID:", newHeadId, household.id);
         await householdsAPI.headChange(household.id, newHeadId);
+        refresh(household.id);
       }
       catch (error) {
         console.error("Error changing household head:", error);
@@ -159,7 +159,7 @@ const HouseholdDetailModal = ({ open, onClose, household, members }) => {
       {mode === null ? (
         <div className="mt-3 flex justify-end gap-2">
           <Button onClick={() => setMode("changeHead")}>Đổi chủ hộ</Button>
-          <Button onClick={() => setMode("remove")}>Gỡ bỏ thành viên</Button>
+          <Button onClick={() => setMode("remove")}>Thay đổi thành viên</Button>
           <Button onClick={() => setMode("split")}>Tách hộ khẩu</Button>
         </div>
       ) : (

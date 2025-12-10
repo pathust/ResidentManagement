@@ -29,7 +29,7 @@ export async function POST(req) {
         if (!response.ok) {
             const errorData = await response.json();
             console.log("Error data:", errorData);
-            return NextResponse.json({ error: errorData.detail || "Failed to get household data" }, { status: response.status });
+            return NextResponse.json({ error: errorData.detail || "Failed to change household's head" }, { status: response.status });
         }
 
         return NextResponse.json({ message: "Added" }, { status: 201 });

@@ -52,6 +52,14 @@ export default function HoKhauPage() {
     }
   };
 
+  const refreshMemberCache = (householdId) => {
+    setMemberCache((prev) => {
+      const updated = { ...prev };
+      delete updated[householdId];
+      return updated;
+    });
+  };
+
   const onAddNewHousehold = async (values) => {
     try {
       await householdsAPI.addOne(values);
@@ -149,6 +157,7 @@ export default function HoKhauPage() {
         onClose={() => setIsDetailOpen(false)}
         household={householdData[currentHousehold] || {}}
         members={memberCache[householdData[currentHousehold]?.id] || []}
+        refresh={refreshMemberCache}
       />
 
       {/* Modal thêm hộ khẩu */}
