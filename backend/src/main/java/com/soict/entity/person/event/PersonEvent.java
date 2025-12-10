@@ -3,6 +3,7 @@ package com.soict.entity.person.event;
 import com.soict.entity.person.Person;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ public class PersonEvent {
     @Column(name = "event_date", nullable = false)
     private LocalDate eventDate;
 
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
