@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Form, Input, Select, Button, message } from "antd";
 import ConfirmModal from "./ConfirmModal";
+import { householdsAPI } from "@/services/householdsAPI";
 
-const SplitHouseholdModal = ({ open, onClose, household, selectedMembers }) => {
+const HouseholdSplitModal = ({ open, onClose, household, selectedMembers }) => {
   const [form] = Form.useForm();
   const [members, setMembers] = useState([]);
 
@@ -27,8 +28,6 @@ const SplitHouseholdModal = ({ open, onClose, household, selectedMembers }) => {
     if (open && household) {
       form.setFieldsValue({
         code: household.code + "_TACH",
-        wardId: household.wardId,
-        houseAddressDetails: household.houseAddressDetails,
         notes: household.notes,
       });
 
@@ -48,14 +47,22 @@ const SplitHouseholdModal = ({ open, onClose, household, selectedMembers }) => {
   }, [open, household, selectedMembers]);
 
   const setMemberHead = (personId, isHead) => {
-    setMembers((prev) =>
-      prev.map((m) => ({
-        ...m,
-        isHead: m.personId === personId,
-        relationWithHead:
-          m.personId === personId ? "" : m.relationWithHead,
-      }))
-    );
+    if (isHead) {
+      setMembers((prev) =>
+        prev.map((m) => ({
+          ...m,
+          isHead: m.personId === personId,
+          relationWithHead:
+            m.personId === personId ? "" : m.relationWithHead,
+        }))
+      );
+    } else {
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.personId === personId ? { ...m, isHead: false } : m
+        )
+      );
+    }
   };
 
   const setMemberRelation = (personId, value) => {
@@ -77,9 +84,8 @@ const SplitHouseholdModal = ({ open, onClose, household, selectedMembers }) => {
       }
 
       const payload = {
-        code: values.code,
-        wardId: values.wardId,
-        houseAddressDetails: values.houseAddressDetails,
+        fromHouseholdId: household.id,
+        newHouseholdCode: values.code,
         notes: values.notes,
         members: members.map((m) => ({
           personId: m.personId,
@@ -89,7 +95,7 @@ const SplitHouseholdModal = ({ open, onClose, household, selectedMembers }) => {
       };
 
       openConfirm("submit", async () => {
-        // await onSubmit(payload);
+        await householdsAPI.splits(payload);
 
         message.success("Tách hộ khẩu thành công!");
         onClose();
@@ -119,32 +125,17 @@ const SplitHouseholdModal = ({ open, onClose, household, selectedMembers }) => {
       >
         <Form form={form} layout="vertical">
           <h3 className="font-semibold text-lg border-b pb-1 mb-3">Thông tin chung</h3>
+          <Form.Item
+            label="Mã hộ khẩu mới"
+            name="code"
+            rules={[{ required: true, message: "Nhập mã hộ khẩu" }]}
+          >
+            <Input />
+          </Form.Item>
 
-          <div className="grid grid-cols-2 gap-8 mb-4">
-            <div className="col-span-1">
-              <Form.Item
-                label="Mã hộ khẩu mới"
-                name="code"
-                rules={[{ required: true, message: "Nhập mã hộ khẩu" }]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item label="Ghi chú" name="notes">
-                <Input.TextArea rows={2} />
-              </Form.Item>
-            </div>
-
-            <div className="col-span-1">
-              <Form.Item label="ID Phường/Xã" name="wardId">
-                <Input disabled />
-              </Form.Item>
-
-              <Form.Item label="Chi tiết địa chỉ" name="houseAddressDetails">
-                <Input.TextArea />
-              </Form.Item>
-            </div>
-          </div>
+          <Form.Item label="Ghi chú" name="notes">
+            <Input.TextArea rows={2} />
+          </Form.Item>
         </Form>
 
         <h3 className="font-semibold text-lg border-b pb-1 mt-6 mb-3">Danh sách thành viên tách ra</h3>
@@ -213,4 +204,4 @@ const SplitHouseholdModal = ({ open, onClose, household, selectedMembers }) => {
   );
 };
 
-export default SplitHouseholdModal;
+export default HouseholdSplitModal;

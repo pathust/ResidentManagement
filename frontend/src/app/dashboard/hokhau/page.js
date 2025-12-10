@@ -4,7 +4,7 @@ import React from "react";
 import { Button, Table, Space, Typography, Tag, message } from "antd";
 import { PlusOutlined, EditOutlined, ScissorOutlined } from "@ant-design/icons";
 
-import { householdAPI } from "@/services/householdsAPI";
+import { householdsAPI } from "@/services/householdsAPI";
 import HouseholdDetailModal from "@/components/HouseholdDetailModal";
 import HouseholdAddModal from "@/components/HouseholdAddModal";
 
@@ -25,7 +25,7 @@ export default function HoKhauPage() {
 
   const fetchHouseholdList = async () => {
     try {
-      const data = await householdAPI.getAll();
+      const data = await householdsAPI.getAll();
       setHouseholdData(data);
     } catch (error) {
       console.error(error);
@@ -37,7 +37,7 @@ export default function HoKhauPage() {
     if (memberCache[householdId]) return memberCache[householdId];
 
     try {
-      const members = await householdAPI.getMembers(householdId);
+      const members = await householdsAPI.getMembers(householdId);
 
       setMemberCache((prev) => ({
         ...prev,
@@ -52,9 +52,17 @@ export default function HoKhauPage() {
     }
   };
 
+  const refreshMemberCache = (householdId) => {
+    setMemberCache((prev) => {
+      const updated = { ...prev };
+      delete updated[householdId];
+      return updated;
+    });
+  };
+
   const onAddNewHousehold = async (values) => {
     try {
-      await householdAPI.addOne(values);
+      await householdsAPI.addOne(values);
       await fetchHouseholdList();
     } catch (error) {
       throw new Error(error.message || "Không thể thêm hộ khẩu mới");
@@ -149,6 +157,7 @@ export default function HoKhauPage() {
         onClose={() => setIsDetailOpen(false)}
         household={householdData[currentHousehold] || {}}
         members={memberCache[householdData[currentHousehold]?.id] || []}
+        refresh={refreshMemberCache}
       />
 
       {/* Modal thêm hộ khẩu */}

@@ -4,12 +4,14 @@ import React, { useState, useMemo } from "react";
 import { Modal, Table, Tag, Button, Input, Space } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 
-import SplitHouseholdModal from "./SplitHouseholdModal";
+import HouseholdSplitModal from "./HouseholdSplitModal";
 
-const HouseholdDetailModal = ({ open, onClose, household, members }) => {
+import { householdsAPI } from "@/services/householdsAPI";
+
+const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) => {
   const [mode, setMode] = useState(null); // "remove", "split", "changeHead" or null
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState(""); 
 
   const [splitModalOpen, setSplitModalOpen] = useState(false);
   const [splitMembers, setSplitMembers] = useState([]);
@@ -78,7 +80,7 @@ const HouseholdDetailModal = ({ open, onClose, household, members }) => {
         }
       : undefined;
   
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     console.log("Confirmed action:", mode, "on members:", selectedRowKeys);
 
     if (mode === "split") {
@@ -87,10 +89,21 @@ const HouseholdDetailModal = ({ open, onClose, household, members }) => {
       );
       setSplitMembers(membersToSplit);
       setSplitModalOpen(true);
+    } else if (mode === "remove") {
+      // Implement remove logic here
+    } else if (mode === "changeHead") {
+      try {
+        const newHeadId = selectedRowKeys[0];
+        await householdsAPI.headChange(household.id, newHeadId);
+        refresh(household.id);
+        setMode(null);
+        setSelectedRowKeys([]);
+        onClose();
+      }
+      catch (error) {
+        console.error("Error changing household head:", error);
+      }
     }
-
-    setMode(null);
-    setSelectedRowKeys([]);
   }
 
   const handleCancel = () => {
@@ -145,7 +158,7 @@ const HouseholdDetailModal = ({ open, onClose, household, members }) => {
       {mode === null ? (
         <div className="mt-3 flex justify-end gap-2">
           <Button onClick={() => setMode("changeHead")}>Đổi chủ hộ</Button>
-          <Button onClick={() => setMode("remove")}>Gỡ bỏ thành viên</Button>
+          <Button onClick={() => setMode("remove")}>Thay đổi thành viên</Button>
           <Button onClick={() => setMode("split")}>Tách hộ khẩu</Button>
         </div>
       ) : (
@@ -155,7 +168,7 @@ const HouseholdDetailModal = ({ open, onClose, household, members }) => {
         </div>
       )}
 
-      <SplitHouseholdModal
+      <HouseholdSplitModal
         open={splitModalOpen}
         onClose={() => { setSplitModalOpen(false); handleCancel(); }}
         household={household}
