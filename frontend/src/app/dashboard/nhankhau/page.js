@@ -1,3 +1,4 @@
+// frontend/src/app/dashboard/nhankhau/page.js
 "use client";
 
 import React from "react";
@@ -9,15 +10,17 @@ import {
   CloseCircleOutlined,
 } from "@ant-design/icons";
 
-import { personAPI } from "@/services/api";
+import { personAPI, deathDeclareAPI } from "@/services/api"; // Thêm deathDeclareAPI
 import PersonDetailModal from "@/components/PersonDetailModal";
-import PersonAddModal from "@/components/PersonAddModal";  // ← Import mới
+import PersonAddModal from "@/components/PersonAddModal";
+import DeathDeclareAddModal from "@/components/DeathDeclareAddModal"; // Import modal mới
 
 const { Title } = Typography;
 
 export default function NhanKhauPage() {
   const [isDetailOpen, setIsDetailOpen] = React.useState(false);
-  const [isAddOpen, setIsAddOpen] = React.useState(false);  // ← State mới
+  const [isAddOpen, setIsAddOpen] = React.useState(false);
+  const [isDeathDeclareOpen, setIsDeathDeclareOpen] = React.useState(false); // State mới
   const [currentPerson, setCurrentPerson] = React.useState(0);
   const [personData, setPersonData] = React.useState([]);
 
@@ -38,7 +41,7 @@ export default function NhanKhauPage() {
   const handleAddPerson = async (values) => {
     try {
       await personAPI.addOne(values);
-      await fetchData();  // Refresh data
+      await fetchData();
     } catch (error) {
       throw new Error(error.message || "Không thể thêm nhân khẩu");
     }
@@ -50,6 +53,17 @@ export default function NhanKhauPage() {
       await fetchData();
     } catch (error) {
       throw new Error(error.message || "Không thể cập nhật thông tin");
+    }
+  };
+
+  // Handler mới cho khai tử
+  const handleDeathDeclare = async (values) => {
+    try {
+      await deathDeclareAPI.create(values);
+      await fetchData(); // Refresh data để cập nhật status
+      message.success("Khai tử thành công!");
+    } catch (error) {
+      throw new Error(error.message || "Không thể khai tử");
     }
   };
 
@@ -125,7 +139,11 @@ export default function NhanKhauPage() {
           </Button>
           <Button icon={<EditOutlined />}>Sửa thông tin</Button>
           <Button icon={<ExportOutlined />}>Chuyển đi</Button>
-          <Button icon={<CloseCircleOutlined />} danger>
+          <Button 
+            icon={<CloseCircleOutlined />} 
+            danger
+            onClick={() => setIsDeathDeclareOpen(true)} // Thêm handler
+          >
             Khai tử
           </Button>
         </Space>
@@ -149,11 +167,18 @@ export default function NhanKhauPage() {
         onSubmit={updatePersonData}
       />
 
-      {/* ✅ Modal thêm mới */}
+      {/* Modal thêm mới */}
       <PersonAddModal
         open={isAddOpen}
         onClose={() => setIsAddOpen(false)}
         onSubmit={handleAddPerson}
+      />
+
+      {/* Modal khai tử - MỚI */}
+      <DeathDeclareAddModal
+        open={isDeathDeclareOpen}
+        onClose={() => setIsDeathDeclareOpen(false)}
+        onSubmit={handleDeathDeclare}
       />
     </div>
   );
