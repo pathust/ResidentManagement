@@ -606,3 +606,65 @@ export const temporaryAbsenceAPI = {
     return response.status === 200;
   },
 };
+
+export const deathDeclareAPI = {
+  getAll: async (filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const paramsString = params.toString() ? `?${params.toString()}` : '';
+    
+    const response = await fetch(`/api/persons/death-declares${paramsString}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch death declares');
+    }
+
+    return response.json();
+  },
+
+  getById: async (id) => {
+    const response = await fetch(`/api/persons/death-declares/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch death declare');
+    }
+
+    return response.json();
+  },
+
+  create: async (data) => {
+    const response = await fetch('/api/persons/death-declares', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create death declare');
+    }
+
+    return response.json();
+  },
+
+  delete: async (id) => {
+    const response = await fetch(`/api/persons/death-declares/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete death declare');
+    }
+
+    return response.status === 200;
+  },
+};
