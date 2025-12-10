@@ -4,7 +4,7 @@ import React from "react";
 import { Button, Table, Space, Typography, Tag, message } from "antd";
 import { PlusOutlined, EditOutlined, ScissorOutlined } from "@ant-design/icons";
 
-import { householdAPI } from "@/services/householdsAPI";
+import { householdsAPI } from "@/services/householdsAPI";
 import HouseholdDetailModal from "@/components/HouseholdDetailModal";
 import HouseholdAddModal from "@/components/HouseholdAddModal";
 
@@ -25,7 +25,7 @@ export default function HoKhauPage() {
 
   const fetchHouseholdList = async () => {
     try {
-      const data = await householdAPI.getAll();
+      const data = await householdsAPI.getAll();
       setHouseholdData(data);
     } catch (error) {
       console.error(error);
@@ -37,7 +37,7 @@ export default function HoKhauPage() {
     if (memberCache[householdId]) return memberCache[householdId];
 
     try {
-      const members = await householdAPI.getMembers(householdId);
+      const members = await householdsAPI.getMembers(householdId);
 
       setMemberCache((prev) => ({
         ...prev,
@@ -54,7 +54,7 @@ export default function HoKhauPage() {
 
   const onAddNewHousehold = async (values) => {
     try {
-      await householdAPI.addOne(values);
+      await householdsAPI.addOne(values);
       await fetchHouseholdList();
     } catch (error) {
       throw new Error(error.message || "Không thể thêm hộ khẩu mới");
