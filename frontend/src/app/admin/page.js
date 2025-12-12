@@ -441,7 +441,7 @@ export default function AdminPage() {
                 key: "roles",
                 label: (
                   <span>
-                    <SafetyCertificateOutlined /> Phân quyền (Matrix)
+                    <SafetyCertificateOutlined /> Phân quyền
                   </span>
                 ),
                 children: (
