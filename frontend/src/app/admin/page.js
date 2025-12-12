@@ -454,7 +454,7 @@ export default function AdminPage() {
                       }}
                     >
                       <Title level={5} style={{ margin: 0 }}>
-                        Ma trận phân quyền
+                        Phân quyền
                       </Title>
                     </div>
 
