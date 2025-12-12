@@ -1,7 +1,18 @@
 "use client";
 
 import React from "react";
-import { Button, Table, Space, Typography, Tag, Tabs, Card, Statistic, message } from "antd";
+import {
+  Button,
+  Table,
+  Space,
+  Typography,
+  Tag,
+  Tabs,
+  Card,
+  Statistic,
+  message,
+  Modal,
+} from "antd";
 import {
   PlusOutlined,
   DollarOutlined,
@@ -10,6 +21,9 @@ import {
   ClockCircleOutlined,
 } from "@ant-design/icons";
 import { feeManagementAPI } from "@/services/api";
+import FeesEventCreateModal from "@/components/FeesEventCreateModal";
+import PaymentCreateModal from "@/components/PaymentCreateModal";
+import FeeTypeCreateModal from "@/components/FeeTypeCreateModal";
 
 const { Title } = Typography;
 
@@ -18,6 +32,15 @@ export default function QuanLyPhiPage() {
   const [paymentsData, setPaymentsData] = React.useState([]);
   const [feeTypesData, setFeeTypesData] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
+  const [isEventModalOpen, setIsEventModalOpen] = React.useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = React.useState(false);
+  const [selectFeesEvent, setSelectFeesEvent] = React.useState(null);
+  const [feesEventMode, setFeesEventMode] = React.useState(undefined);
+  const [selectPayment, setSelectPayment] = React.useState(null);
+  const [paymentMode, setPaymentMode] = React.useState(undefined);
+  const [isFeeTypeModalOpen, setIsFeeTypeModalOpen] = React.useState(false);
+  const [selectFeeType, setSelectFeeType] = React.useState(null);
+  const [feeTypeMode, setFeeTypeMode] = React.useState(undefined);
 
   React.useEffect(() => {
     fetchAllData();
@@ -82,10 +105,26 @@ export default function QuanLyPhiPage() {
       width: 120,
       render: (status) => {
         const statusConfig = {
-          OPEN: { color: "processing", icon: <ClockCircleOutlined />, text: "Đang thu" },
-          CLOSED: { color: "success", icon: <CheckCircleOutlined />, text: "Đã đóng" },
+          OPEN: {
+            color: "processing",
+            icon: <ClockCircleOutlined />,
+            text: "Đang thu",
+          },
+          CLOSED: {
+            color: "success",
+            icon: <CheckCircleOutlined />,
+            text: "Đã đóng",
+          },
+          CANCELED: {
+            color: "error",
+            icon: <ClockCircleOutlined />,
+            text: "Đã hủy",
+          },
         };
-        const config = statusConfig[status] || { color: "default", text: status };
+        const config = statusConfig[status] || {
+          color: "default",
+          text: status,
+        };
         return (
           <Tag icon={config.icon} color={config.color}>
             {config.text}
@@ -103,13 +142,55 @@ export default function QuanLyPhiPage() {
       title: "Thao tác",
       key: "action",
       width: 150,
-      render: () => (
+      render: (_, record) => (
         <Space>
-          <Button type="link" size="small">
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectFeesEvent(record);
+              setIsEventModalOpen(true);
+              setFeesEventMode("VIEW");
+            }}
+          >
             Xem
           </Button>
-          <Button type="link" size="small">
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectFeesEvent(record);
+              setIsEventModalOpen(true);
+              setFeesEventMode("EDIT");
+            }}
+          >
             Sửa
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            danger
+            onClick={() => {
+              Modal.confirm({
+                title: "Xác nhận xóa đợt thu",
+                content: `Bạn có chắc muốn xóa đợt thu #${record.id}?`,
+                okText: "Xóa",
+                okType: "danger",
+                cancelText: "Hủy",
+                onOk: async () => {
+                  try {
+                    await feeManagementAPI.deleteEvent(record.id);
+                    message.success("Xóa đợt thu thành công");
+                    fetchAllData();
+                  } catch (err) {
+                    console.error(err);
+                    message.error(err.message || "Xóa thất bại");
+                  }
+                },
+              });
+            }}
+          >
+            Xóa
           </Button>
         </Space>
       ),
@@ -172,8 +253,11 @@ export default function QuanLyPhiPage() {
           PENDING: { color: "warning", text: "Chưa nộp" },
           COMPLETED: { color: "success", text: "Đã nộp" },
         };
-          
-        const config = statusConfig[status] || { color: "default", text: status };
+
+        const config = statusConfig[status] || {
+          color: "default",
+          text: status,
+        };
         return <Tag color={config.color}>{config.text}</Tag>;
       },
     },
@@ -181,10 +265,29 @@ export default function QuanLyPhiPage() {
       title: "Thao tác",
       key: "action",
       width: 100,
-      render: () => (
+      render: (_, record) => (
         <Space>
-          <Button type="link" size="small">
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectPayment(record);
+              setIsPaymentModalOpen(true);
+              setPaymentMode("VIEW");
+            }}
+          >
             Xem
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectPayment(record);
+              setIsPaymentModalOpen(true);
+              setPaymentMode("EDIT");
+            }}
+          >
+            Sửa
           </Button>
         </Space>
       ),
@@ -226,7 +329,6 @@ export default function QuanLyPhiPage() {
         const freqMap = {
           ONE_TIME: "Một lần",
           MONTHLY: "Hàng tháng",
-          QUARTERLY: "Hàng quý",
           YEARLY: "Hàng năm",
         };
         return freqMap[freq] || freq;
@@ -247,12 +349,54 @@ export default function QuanLyPhiPage() {
       title: "Thao tác",
       key: "action",
       width: 150,
-      render: () => (
+      render: (_, record) => (
         <Space>
-          <Button type="link" size="small">
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectFeeType(record);
+              setIsFeeTypeModalOpen(true);
+              setFeeTypeMode("VIEW");
+            }}
+          >
+            Xem
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectFeeType(record);
+              setIsFeeTypeModalOpen(true);
+              setFeeTypeMode("EDIT");
+            }}
+          >
             Sửa
           </Button>
-          <Button type="link" size="small" danger>
+          <Button
+            type="link"
+            size="small"
+            danger
+            onClick={() => {
+              Modal.confirm({
+                title: "Xác nhận xóa loại phí",
+                content: `Bạn có chắc muốn xóa loại phí "${record.name}"?`,
+                okText: "Xóa",
+                okType: "danger",
+                cancelText: "Hủy",
+                onOk: async () => {
+                  try {
+                    await feeManagementAPI.deleteFeeType(record.id);
+                    message.success("Xóa loại phí thành công");
+                    fetchAllData();
+                  } catch (err) {
+                    console.error(err);
+                    message.error(err.message || "Xóa thất bại");
+                  }
+                },
+              });
+            }}
+          >
             Xóa
           </Button>
         </Space>
@@ -264,7 +408,10 @@ export default function QuanLyPhiPage() {
   const stats = {
     totalEvents: eventsData.length || 0,
     activeEvents: eventsData.filter((e) => e.status === "OPEN").length || 0,
-    totalExpected: eventsData.reduce((sum, e) => sum + (e.totalExpected || 0), 0),
+    totalExpected: eventsData.reduce(
+      (sum, e) => sum + (e.totalExpected || 0),
+      0
+    ),
     totalPaid: paymentsData.reduce((sum, p) => sum + (p.amountPaid || 0), 0),
   };
 
@@ -307,7 +454,15 @@ export default function QuanLyPhiPage() {
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <Button icon={<PlusOutlined />} type="primary">
+            <Button
+              icon={<PlusOutlined />}
+              type="primary"
+              onClick={() => {
+                setSelectFeesEvent(null);
+                setIsEventModalOpen(true);
+                setFeesEventMode("CREATE");
+              }}
+            >
               Tạo đợt thu mới
             </Button>
           </div>
@@ -333,7 +488,15 @@ export default function QuanLyPhiPage() {
         <div>
           <div style={{ marginBottom: 16 }}>
             <Space>
-              <Button icon={<DollarOutlined />} type="primary">
+              <Button
+                icon={<DollarOutlined />}
+                type="primary"
+                onClick={() => {
+                  setIsPaymentModalOpen(true);
+                  setSelectPayment(null);
+                  setPaymentMode("CREATE");
+                }}
+              >
                 Ghi nhận thanh toán
               </Button>
             </Space>
@@ -359,7 +522,15 @@ export default function QuanLyPhiPage() {
       children: (
         <div>
           <div style={{ marginBottom: 16 }}>
-            <Button icon={<PlusOutlined />} type="primary">
+            <Button
+              icon={<PlusOutlined />}
+              type="primary"
+              onClick={() => {
+                setSelectFeeType(null);
+                setIsFeeTypeModalOpen(true);
+                setFeeTypeMode("CREATE");
+              }}
+            >
               Thêm loại phí mới
             </Button>
           </div>
@@ -429,6 +600,42 @@ export default function QuanLyPhiPage() {
       </div>
 
       <Tabs items={tabItems} />
+      <FeesEventCreateModal
+        visible={isEventModalOpen}
+        onClose={() => setIsEventModalOpen(false)}
+        onCreated={() => fetchAllData()}
+        feesEvent={selectFeesEvent}
+        feesEventMode={feesEventMode}
+        onUpdated={() => {
+          fetchAllData();
+        }}
+        onSwitchToEdit={() => {
+          setFeesEventMode("EDIT");
+        }}
+        onSwitchToView={() => {
+          setFeesEventMode("VIEW");
+        }}
+      />
+      <PaymentCreateModal
+        visible={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onCreated={() => fetchAllData()}
+        onUpdated={() => fetchAllData()}
+        payment={selectPayment}
+        paymentMode={paymentMode}
+        onSwitchToEdit={() => setPaymentMode("EDIT")}
+        onSwitchToView={() => setPaymentMode("VIEW")}
+      />
+      <FeeTypeCreateModal
+        visible={isFeeTypeModalOpen}
+        onClose={() => setIsFeeTypeModalOpen(false)}
+        onCreated={() => fetchAllData()}
+        onUpdated={() => fetchAllData()}
+        feeType={selectFeeType}
+        feeTypeMode={feeTypeMode}
+        onSwitchToEdit={() => setFeeTypeMode("EDIT")}
+        onSwitchToView={() => setFeeTypeMode("VIEW")}
+      />
     </div>
   );
 }

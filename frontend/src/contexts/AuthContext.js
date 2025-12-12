@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
         if (util === null) {
           const provincesData = await locationAPI.getAllProvinces();
           const ethnicitiesData = await locationAPI.getAllEthnicities();
-          
+
           setUtil({
             provincesData,
             ethnicitiesData,
@@ -43,10 +43,12 @@ export function AuthProvider({ children }) {
     try {
       const response = await authAPI.login(username, password);
 
-      localStorage.setItem("user", JSON.stringify({ username }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ username, role: response.data.role })
+      );
+      setUser({ username, role: response.data.role });
 
-      setUser({ username });
-      
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
