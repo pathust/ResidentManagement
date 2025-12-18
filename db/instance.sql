@@ -131,7 +131,32 @@ VALUES
 
     (1, 'Nguyễn Văn Cường', '2012-03-10', 'TP Hồ Chí Minh', 1, NULL, 1,
      'Không', 'M', 'Học sinh', 'Trường THCS Đồng Khởi',
-     NULL, NULL, NULL, NULL, NULL, 'ALIVE', 'Con ông An', 1, NOW(), NOW());
+     NULL, NULL, NULL, NULL, NULL, 'ALIVE', 'Con ông An', 1, NOW(), NOW()),
+
+     (1, 'Lê Văn Dũng', '1955-11-12', 'Hải Phòng', 1, 'Quận Lê Chân', 1,
+    'Không', 'M', 'Hưu trí', 'Công ty Cảng Hải Phòng',
+    '001155009999', '2021-03-12', 'Cục CS QLHC về TTXH', '0905123456',
+    'levandung55@gmail.com', 'ALIVE', 'Bố ông An', 1, NOW(), NOW()),
+
+    (1, 'Phạm Thị Hoa', '1958-07-18', 'Hải Phòng', 1, 'Quận Lê Chân', 1,
+    'Không', 'F', 'Nội trợ', NULL,
+    '001158001122', '2021-03-12', 'Cục CS QLHC về TTXH', '0915223344',
+    'phamthihhoa@gmail.com', 'ALIVE', 'Mẹ ông An', 1, NOW(), NOW()),
+
+    (1, 'Nguyễn Minh Khôi', '2008-09-05', 'Hà Nội', 3, 'Quận Đống Đa', 1,
+    'Không', 'M', 'Học sinh', 'Trường THCS Nguyễn Trãi',
+    '001108006666', '2022-01-10', 'Cục CS QLHC về TTXH', '0933667788',
+    'minhkhoi2008@gmail.com', 'ALIVE', 'Cháu ông An', 1, NOW(), NOW()),
+
+    (1, 'Nguyễn Bảo Châu', '2015-12-22', 'Hà Nội', 3, 'Quận Đống Đa', 1,
+    'Không', 'F', 'Học sinh', 'Trường Tiểu học Kim Liên',
+    NULL, NULL, NULL, NULL,
+    'baochaubaby@gmail.com', 'ALIVE', 'Cháu ông An', 1, NOW(), NOW()),
+
+    (1, 'Hoàng Văn Huy', '1992-04-01', 'Thái Bình', 1, 'TP Thái Bình', 1,
+    'Không', 'M', 'Nhân viên IT', 'FPT Software',
+    '001192008888', '2022-05-05', 'Cục CS QLHC về TTXH', '0977888999',
+    'hoanghuy92@gmail.com', 'ALIVE', 'Em rể ông An', 1, NOW(), NOW());
 
 INSERT INTO household_membership (
     household_id, person_id, is_household_head,
