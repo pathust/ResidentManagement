@@ -86,7 +86,7 @@ const HouseholdSplitModal = ({ open, onClose, household, selectedMembers }) => {
       const payload = {
         fromHouseholdId: household.id,
         newHouseholdCode: values.code,
-        notes: values.notes,
+        notes: values.notes || "",
         members: members.map((m) => ({
           personId: m.personId,
           isHead: m.isHead,
