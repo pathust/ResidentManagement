@@ -777,3 +777,5 @@ export const userManagementAPI = {
     return response.json();
   },
 };
+
+export { statsAPI } from './statsAPI';
