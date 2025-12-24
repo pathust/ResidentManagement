@@ -38,7 +38,7 @@ export default function DashboardLayout({ children }) {
   const menuItems = [
     {
       key: "/dashboard",
-      icon: <TeamOutlined />,
+      icon: <BarChartOutlined />,
       label: "Tổng quan",
     },
     {
@@ -65,11 +65,6 @@ export default function DashboardLayout({ children }) {
       key: "/dashboard/quanlyquy",
       icon: <WalletOutlined />,
       label: "Quản lý Quỹ",
-    },
-    {
-      key: "/dashboard/thongke",
-      icon: <BarChartOutlined />,
-      label: "Thống kê & Tìm kiếm",
     },
   ];
 
