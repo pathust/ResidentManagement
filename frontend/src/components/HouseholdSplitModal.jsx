@@ -3,7 +3,7 @@ import { Modal, Form, Input, Select, Button, message } from "antd";
 import ConfirmModal from "./ConfirmModal";
 import { householdsAPI } from "@/services/householdsAPI";
 
-const HouseholdSplitModal = ({ open, onClose, household, selectedMembers }) => {
+const HouseholdSplitModal = ({ open, onClose, household, selectedMembers, refresh }) => {
   const [form] = Form.useForm();
   const [members, setMembers] = useState([]);
 
@@ -98,6 +98,7 @@ const HouseholdSplitModal = ({ open, onClose, household, selectedMembers }) => {
         await householdsAPI.splits(payload);
 
         message.success("Tách hộ khẩu thành công!");
+        await refresh();
         onClose();
       });
     } catch (e) {
