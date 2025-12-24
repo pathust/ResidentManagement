@@ -761,7 +761,7 @@ public class HouseholdService {
             var oldMem = fromMemberships.get(i);
 
             oldMem.setEndDate(splitDate);
-            membershipRepository.save(oldMem);
+            membershipRepository.saveAndFlush(oldMem);
 
             var newMem = new HouseholdMembership();
             newMem.setHousehold(to);
