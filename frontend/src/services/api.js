@@ -777,3 +777,41 @@ export const userManagementAPI = {
     return response.json();
   },
 };
+
+export const statsAPI = {
+  getPersonOverview: async () => {
+    const response = await fetch("/api/stats/overview/persons", {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to fetch person overview stats");
+    return response.json();
+  },
+
+  getHouseholdOverview: async () => {
+    const response = await fetch("/api/stats/overview/households", {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to fetch household overview stats");
+    return response.json();
+  },
+
+  getWardPersonStats: async (wardId) => {
+    const response = await fetch(`/api/stats/wards/${wardId}/persons`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to fetch ward person stats");
+    return response.json();
+  },
+
+  getWardHouseholdStats: async (wardId) => {
+    const response = await fetch(`/api/stats/wards/${wardId}/households`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to fetch ward household stats");
+    return response.json();
+  },
+};
