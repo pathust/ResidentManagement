@@ -1,5 +1,6 @@
 package com.soict.service;
 
+import com.soict.dto.household.HouseholdMembershipDTO;
 import com.soict.dto.person.*;
 import com.soict.dto.person.event.BirthDeclareRequest;
 import com.soict.entity.household.Household;
@@ -8,6 +9,7 @@ import com.soict.entity.person.*;
 import com.soict.entity.person.event.*;
 import com.soict.exception.ResourceNotFoundException;
 import com.soict.exception.BusinessException;
+import com.soict.mapper.household.HouseholdMapper;
 import com.soict.mapper.person.event.BirthDeclareMapper;
 import com.soict.mapper.person.event.DeathDeclareMapper;
 import com.soict.mapper.person.event.TemporaryResidenceMapper;
@@ -55,7 +57,7 @@ public class PersonService {
     private final PersonTemporaryResidenceRepository personTemporaryResidenceRepository;
     private final PersonTemporaryAbsenceRepository personTemporaryAbsenceRepository;
     private final WardRepository wardRepository;
-
+    private final HouseholdMapper householdMapper;
 
     // ========== BASIC CRUD ==========
 
@@ -1014,5 +1016,29 @@ public class PersonService {
                 .stream()
                 .map(permanentResidenceChangeMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public List<HouseholdMembershipDTO> getMembershipsByPersonId(Integer personId) {
+        if (!personRepository.existsById(personId)) {
+            throw new ResourceNotFoundException("Person not found with id: " + personId);
+        }
+
+        return householdMembershipRepository.findByPersonId(personId).stream()
+                .map(householdMapper::toMembershipDTO)
+                .collect(Collectors.toList());
+    }
+
+    public Page<HouseholdMembershipDTO> getMembershipsByPersonIdPaginated(Integer personId, Pageable pageable) {
+        if (!personRepository.existsById(personId)) {
+            throw new ResourceNotFoundException("Person not found with id: " + personId);
+        }
+
+        Pageable sorted = pageable.getSort().isUnsorted()
+                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "startDate"))
+                : pageable;
+
+        return householdMembershipRepository.findByPersonId(personId, sorted)
+                .map(householdMapper::toMembershipDTO);
     }
 }

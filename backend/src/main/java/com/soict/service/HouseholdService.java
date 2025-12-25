@@ -947,4 +947,30 @@ public class HouseholdService {
         householdSplitMemberRepository.deleteById(id);
     }
 
+    public List<HouseholdMembershipDTO> getAllMembershipsByHouseholdId(Integer householdId) {
+        if (!householdRepository.existsById(householdId)) {
+            throw new ResourceNotFoundException("Household not found with id: " + householdId);
+        }
+
+        Specification<HouseholdMembership> spec = (root, query, cb) ->
+                cb.equal(root.get("household").get("id"), householdId);
+
+        return membershipRepository.findAll(spec)
+                .stream()
+                .map(householdMapper::toMembershipDTO)
+                .collect(Collectors.toList());
+    }
+
+    public Page<HouseholdMembershipDTO> getAllMembershipsByHouseholdIdPaginated(Integer householdId, Pageable pageable) {
+        if (!householdRepository.existsById(householdId)) {
+            throw new ResourceNotFoundException("Household not found with id: " + householdId);
+        }
+
+        Specification<HouseholdMembership> spec = (root, query, cb) ->
+                cb.equal(root.get("household").get("id"), householdId);
+
+        return membershipRepository.findAll(spec, pageable)
+                .map(householdMapper::toMembershipDTO);
+    }
+
 }
