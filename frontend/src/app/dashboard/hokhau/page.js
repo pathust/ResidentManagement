@@ -34,8 +34,6 @@ export default function HoKhauPage() {
   };
 
   const fetchMembersByHousehold = async (householdId) => {
-    if (memberCache[householdId]) return memberCache[householdId];
-
     try {
       const members = await householdsAPI.getMembers(householdId);
 
@@ -52,12 +50,18 @@ export default function HoKhauPage() {
     }
   };
 
-  const refreshMemberCache = (householdId) => {
+  const refreshMemberCache = async (householdId) => {
+    console.log("Refreshing cache for household:", householdId);
+    
+    // Clear old cache
     setMemberCache((prev) => {
       const updated = { ...prev };
       delete updated[householdId];
       return updated;
     });
+
+    // Fetch fresh data
+    await fetchMembersByHousehold(householdId);
   };
 
   const onAddNewHousehold = async (values) => {
@@ -157,7 +161,8 @@ export default function HoKhauPage() {
         onClose={() => setIsDetailOpen(false)}
         household={householdData[currentHousehold] || {}}
         members={memberCache[householdData[currentHousehold]?.id] || []}
-        refresh={refreshMemberCache}
+        refreshMember={refreshMemberCache}
+        refresh={fetchHouseholdList}
       />
 
       {/* Modal thêm hộ khẩu */}

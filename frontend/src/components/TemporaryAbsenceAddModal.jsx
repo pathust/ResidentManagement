@@ -2,7 +2,8 @@
 
 import React from "react";
 import { Modal, Form, Input, DatePicker, Select, message } from "antd";
-import { locationAPI, personAPI, householdAPI } from "@/services/api";
+import { locationAPI, personAPI } from "@/services/api";
+import { householdsAPI } from "@/services/householdsAPI";
 
 const TemporaryAbsenceAddModal = ({ open, onClose, onSubmit }) => {
   const [form] = Form.useForm();
@@ -20,7 +21,7 @@ const TemporaryAbsenceAddModal = ({ open, onClose, onSubmit }) => {
         const [provincesData, personsData, householdsData] = await Promise.all([
           locationAPI.getAllProvinces(),
           personAPI.getAll(),
-          householdAPI.getAll({ pageSize: 100, pageIndex: 0 })
+          householdsAPI.getAll({ pageSize: 100, pageIndex: 0 })
         ]);
         setProvinces(provincesData);
         setPersons(personsData);
@@ -105,7 +106,7 @@ const TemporaryAbsenceAddModal = ({ open, onClose, onSubmit }) => {
       confirmLoading={loading}
       width={800}
       centered
-      destroyOnClose={true}
+      destroyOnHidden={true}
       maskClosable={false}
       styles={{
         body: {

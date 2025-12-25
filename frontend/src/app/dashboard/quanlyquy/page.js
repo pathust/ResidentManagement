@@ -1,7 +1,18 @@
 "use client";
 
 import React from "react";
-import { Button, Table, Space, Typography, Tag, Tabs, Card, Statistic, message } from "antd";
+import {
+  Button,
+  Table,
+  Space,
+  Typography,
+  Tag,
+  Tabs,
+  Card,
+  Statistic,
+  message,
+  Modal,
+} from "antd";
 import {
   PlusOutlined,
   WalletOutlined,
@@ -10,8 +21,19 @@ import {
   SwapOutlined,
 } from "@ant-design/icons";
 import { fundManagementAPI } from "@/services/api";
+import FundCreateModal from "@/components/FundCreateModal";
+import TransactionCreateModal from "@/components/TransactionCreateModal";
+import ExpenseCreateModal from "@/components/ExpenseCreateModal";
+import TransferCreateModal from "@/components/TransferCreateModal";
 
 const { Title } = Typography;
+
+const TYPE_OPTIONS = [
+  { label: "Thu phí", value: "PAYMENT" },
+  { label: "Chi tiêu", value: "EXPENSE" },
+  { label: "Chuyển quỹ", value: "TRANSFER" },
+  { label: "Phát thưởng", value: "REWARD" },
+];
 
 export default function QuanLyQuyPage() {
   const [fundsData, setFundsData] = React.useState([]);
@@ -19,6 +41,19 @@ export default function QuanLyQuyPage() {
   const [expensesData, setExpensesData] = React.useState([]);
   const [transfersData, setTransfersData] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
+  const [isFundModalOpen, setIsFundModalOpen] = React.useState(false);
+  const [selectFund, setSelectFund] = React.useState(null);
+  const [fundMode, setFundMode] = React.useState(undefined);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] =
+    React.useState(false);
+  const [selectTransaction, setSelectTransaction] = React.useState(null);
+  const [transactionMode, setTransactionMode] = React.useState(undefined);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = React.useState(false);
+  const [selectExpense, setSelectExpense] = React.useState(null);
+  const [expenseMode, setExpenseMode] = React.useState(undefined);
+  const [isTransferModalOpen, setIsTransferModalOpen] = React.useState(false);
+  const [selectTransfer, setSelectTransfer] = React.useState(null);
+  const [transferMode, setTransferMode] = React.useState(undefined);
 
   React.useEffect(() => {
     fetchAllData();
@@ -65,8 +100,8 @@ export default function QuanLyQuyPage() {
       width: 150,
       render: (type) => {
         const typeMap = {
-          GENERAL: "Quỹ chung",
-          SPECIFIC: "Quỹ chuyên dụng",
+          RESTRICTED: "Quỹ bắt buộc",
+          UNRESTRICTED: "Quỹ không bắt buộc",
         };
         return typeMap[type] || type;
       },
@@ -77,7 +112,12 @@ export default function QuanLyQuyPage() {
       key: "balance",
       width: 150,
       render: (value) => (
-        <span style={{ color: value >= 0 ? "#3f8600" : "#cf1322", fontWeight: "bold" }}>
+        <span
+          style={{
+            color: value >= 0 ? "#3f8600" : "#cf1322",
+            fontWeight: "bold",
+          }}
+        >
           {value?.toLocaleString("vi-VN") || "0"}
         </span>
       ),
@@ -98,13 +138,55 @@ export default function QuanLyQuyPage() {
       title: "Thao tác",
       key: "action",
       width: 150,
-      render: () => (
+      render: (_, record) => (
         <Space>
-          <Button type="link" size="small">
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectFund(record);
+              setIsFundModalOpen(true);
+              setFundMode("VIEW");
+            }}
+          >
             Xem
           </Button>
-          <Button type="link" size="small">
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectFund(record);
+              setIsFundModalOpen(true);
+              setFundMode("EDIT");
+            }}
+          >
             Sửa
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            danger
+            onClick={() => {
+              Modal.confirm({
+                title: "Xác nhận xóa quỹ",
+                content: `Bạn có chắc muốn xóa quỹ "${record.name}"?`,
+                okText: "Xóa",
+                okType: "danger",
+                cancelText: "Hủy",
+                onOk: async () => {
+                  try {
+                    await fundManagementAPI.deleteFund(record.id);
+                    message.success("Xóa quỹ thành công");
+                    fetchAllData();
+                  } catch (err) {
+                    console.error(err);
+                    message.error(err.message || "Xóa thất bại");
+                  }
+                },
+              });
+            }}
+          >
+            Xóa
           </Button>
         </Space>
       ),
@@ -117,7 +199,7 @@ export default function QuanLyQuyPage() {
       title: "Mã",
       dataIndex: "id",
       key: "id",
-      width: 80,
+      width: 50,
     },
     {
       title: "Quỹ",
@@ -129,7 +211,6 @@ export default function QuanLyQuyPage() {
       title: "Loại giao dịch",
       dataIndex: "transactionType",
       key: "transactionType",
-      width: 150,
       render: (type) => {
         const typeMap = {
           INFLOW: { color: "green", text: "Thu" },
@@ -147,7 +228,11 @@ export default function QuanLyQuyPage() {
       key: "amount",
       width: 150,
       render: (value, record) => {
-        const color = (record.transactionType === "INFLOW" || record.transactionType === "TRANSFER_IN") ? "#3f8600" : "#cf1322";
+        const color =
+          record.transactionType === "INFLOW" ||
+          record.transactionType === "TRANSFER_IN"
+            ? "#3f8600"
+            : "#cf1322";
         return (
           <span style={{ color, fontWeight: "bold" }}>
             {value?.toLocaleString("vi-VN") || "0"}
@@ -159,28 +244,77 @@ export default function QuanLyQuyPage() {
       title: "Ngày giao dịch",
       dataIndex: "transactionDate",
       key: "transactionDate",
-      width: 120,
+      width: 150,
     },
     {
       title: "Người thực hiện",
       dataIndex: "user",
       key: "user",
       render: (_, record) => record.username || "—",
+      width: 150,
     },
-    {
-      title: "Ghi chú",
-      dataIndex: "notes",
-      key: "notes",
-      ellipsis: true,
-    },
+    // {
+    //   title: "Ghi chú",
+    //   dataIndex: "notes",
+    //   key: "notes",
+    //   ellipsis: true,
+    //   width: 150,
+    // },
     {
       title: "Thao tác",
       key: "action",
       width: 100,
-      render: () => (
-        <Button type="link" size="small">
-          Xem
-        </Button>
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectTransaction(record);
+              setIsTransactionModalOpen(true);
+              setTransactionMode("VIEW");
+            }}
+          >
+            Xem
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectTransaction(record);
+              setIsTransactionModalOpen(true);
+              setTransactionMode("EDIT");
+            }}
+          >
+            Sửa
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            danger
+            onClick={() => {
+              Modal.confirm({
+                title: "Xác nhận xóa giao dịch",
+                content: `Bạn có chắc muốn xóa giao dịch #${record.id}?`,
+                okText: "Xóa",
+                okType: "danger",
+                cancelText: "Hủy",
+                onOk: async () => {
+                  try {
+                    await fundManagementAPI.deleteTransaction(record.id);
+                    message.success("Xóa giao dịch thành công");
+                    fetchAllData();
+                  } catch (err) {
+                    console.error(err);
+                    message.error(err.message || "Xóa thất bại");
+                  }
+                },
+              });
+            }}
+          >
+            Xóa
+          </Button>
+        </Space>
       ),
     },
   ];
@@ -235,9 +369,9 @@ export default function QuanLyQuyPage() {
       width: 120,
       render: (status) => {
         const statusMap = {
+          APPROVED: { color: "success", text: "Đã duyệt" },
           PENDING: { color: "warning", text: "Chờ duyệt" },
-          COMPLETED: { color: "success", text: "Đã hoàn thành" },
-          CANCELLED: { color: "error", text: "Đã hủy" },
+          REJECTED: { color: "error", text: "Đã hủy" },
         };
         const config = statusMap[status] || { color: "default", text: status };
         return <Tag color={config.color}>{config.text}</Tag>;
@@ -246,11 +380,58 @@ export default function QuanLyQuyPage() {
     {
       title: "Thao tác",
       key: "action",
-      width: 100,
-      render: () => (
-        <Button type="link" size="small">
-          Xem
-        </Button>
+      width: 150,
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectExpense(record);
+              setIsExpenseModalOpen(true);
+              setExpenseMode("VIEW");
+            }}
+          >
+            Xem
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectExpense(record);
+              setIsExpenseModalOpen(true);
+              setExpenseMode("EDIT");
+            }}
+          >
+            Sửa
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            danger
+            onClick={() => {
+              Modal.confirm({
+                title: "Xác nhận xóa phiếu chi",
+                content: `Bạn có chắc muốn xóa phiếu chi #${record.id}?`,
+                okText: "Xóa",
+                okType: "danger",
+                cancelText: "Hủy",
+                onOk: async () => {
+                  try {
+                    await fundManagementAPI.deleteExpense(record.id);
+                    message.success("Xóa phiếu chi thành công");
+                    fetchAllData();
+                  } catch (err) {
+                    console.error(err);
+                    message.error(err.message || "Xóa thất bại");
+                  }
+                },
+              });
+            }}
+          >
+            Xóa
+          </Button>
+        </Space>
       ),
     },
   ];
@@ -316,11 +497,58 @@ export default function QuanLyQuyPage() {
     {
       title: "Thao tác",
       key: "action",
-      width: 100,
-      render: () => (
-        <Button type="link" size="small">
-          Xem
-        </Button>
+      width: 150,
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectTransfer(record);
+              setIsTransferModalOpen(true);
+              setTransferMode("VIEW");
+            }}
+          >
+            Xem
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setSelectTransfer(record);
+              setIsTransferModalOpen(true);
+              setTransferMode("EDIT");
+            }}
+          >
+            Sửa
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            danger
+            onClick={() => {
+              Modal.confirm({
+                title: "Xác nhận xóa chuyển quỹ",
+                content: `Bạn có chắc muốn xóa chuyển quỹ #${record.id}?`,
+                okText: "Xóa",
+                okType: "danger",
+                cancelText: "Hủy",
+                onOk: async () => {
+                  try {
+                    await fundManagementAPI.deleteTransfer(record.id);
+                    message.success("Xóa chuyển quỹ thành công");
+                    fetchAllData();
+                  } catch (err) {
+                    console.error(err);
+                    message.error(err.message || "Xóa thất bại");
+                  }
+                },
+              });
+            }}
+          >
+            Xóa
+          </Button>
+        </Space>
       ),
     },
   ];
@@ -330,11 +558,18 @@ export default function QuanLyQuyPage() {
     totalFunds: fundsData.length || 0,
     totalBalance: fundsData.reduce((sum, f) => sum + (f.balance || 0), 0),
     totalIncome: transactionsData
-        .filter((t) => t.transactionType === "INFLOW" || t.transactionType === "TRANSFER_IN")
-        .reduce((sum, t) => sum + (t.amount || 0), 0),
+      .filter(
+        (t) =>
+          t.transactionType === "INFLOW" || t.transactionType === "TRANSFER_IN"
+      )
+      .reduce((sum, t) => sum + (t.amount || 0), 0),
     totalExpense: transactionsData
-        .filter((t) => t.transactionType === "OUTFLOW" || t.transactionType === "TRANSFER_OUT")
-        .reduce((sum, t) => sum + (t.amount || 0), 0),
+      .filter(
+        (t) =>
+          t.transactionType === "OUTFLOW" ||
+          t.transactionType === "TRANSFER_OUT"
+      )
+      .reduce((sum, t) => sum + (t.amount || 0), 0),
   };
 
   const tabItems = [
@@ -376,7 +611,15 @@ export default function QuanLyQuyPage() {
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <Button icon={<PlusOutlined />} type="primary">
+            <Button
+              icon={<PlusOutlined />}
+              type="primary"
+              onClick={() => {
+                setSelectFund(null);
+                setIsFundModalOpen(true);
+                setFundMode("CREATE");
+              }}
+            >
               Tạo quỹ mới
             </Button>
           </div>
@@ -401,7 +644,15 @@ export default function QuanLyQuyPage() {
       children: (
         <div>
           <div style={{ marginBottom: 16 }}>
-            <Button icon={<TransactionOutlined />} type="primary">
+            <Button
+              icon={<TransactionOutlined />}
+              type="primary"
+              onClick={() => {
+                setSelectTransaction(null);
+                setIsTransactionModalOpen(true);
+                setTransactionMode("CREATE");
+              }}
+            >
               Tạo giao dịch mới
             </Button>
           </div>
@@ -426,7 +677,15 @@ export default function QuanLyQuyPage() {
       children: (
         <div>
           <div style={{ marginBottom: 16 }}>
-            <Button icon={<ShoppingOutlined />} type="primary">
+            <Button
+              icon={<ShoppingOutlined />}
+              type="primary"
+              onClick={() => {
+                setSelectExpense(null);
+                setIsExpenseModalOpen(true);
+                setExpenseMode("CREATE");
+              }}
+            >
               Tạo phiếu chi mới
             </Button>
           </div>
@@ -451,7 +710,15 @@ export default function QuanLyQuyPage() {
       children: (
         <div>
           <div style={{ marginBottom: 16 }}>
-            <Button icon={<SwapOutlined />} type="primary">
+            <Button
+              icon={<SwapOutlined />}
+              type="primary"
+              onClick={() => {
+                setSelectTransfer(null);
+                setIsTransferModalOpen(true);
+                setTransferMode("CREATE");
+              }}
+            >
               Tạo chuyển quỹ mới
             </Button>
           </div>
@@ -491,7 +758,10 @@ export default function QuanLyQuyPage() {
                 title="Chênh lệch (VNĐ)"
                 value={stats.totalIncome - stats.totalExpense}
                 valueStyle={{
-                  color: stats.totalIncome - stats.totalExpense >= 0 ? "#3f8600" : "#cf1322",
+                  color:
+                    stats.totalIncome - stats.totalExpense >= 0
+                      ? "#3f8600"
+                      : "#cf1322",
                 }}
               />
             </div>
@@ -517,6 +787,46 @@ export default function QuanLyQuyPage() {
       </div>
 
       <Tabs items={tabItems} />
+      <FundCreateModal
+        visible={isFundModalOpen}
+        onClose={() => setIsFundModalOpen(false)}
+        onCreated={() => fetchAllData()}
+        onUpdated={() => fetchAllData()}
+        fund={selectFund}
+        fundMode={fundMode}
+        onSwitchToEdit={() => setFundMode("EDIT")}
+        onSwitchToView={() => setFundMode("VIEW")}
+      />
+      <TransactionCreateModal
+        visible={isTransactionModalOpen}
+        onClose={() => setIsTransactionModalOpen(false)}
+        onCreated={() => fetchAllData()}
+        onUpdated={() => fetchAllData()}
+        transaction={selectTransaction}
+        transactionMode={transactionMode}
+        onSwitchToEdit={() => setTransactionMode("EDIT")}
+        onSwitchToView={() => setTransactionMode("VIEW")}
+      />
+      <ExpenseCreateModal
+        visible={isExpenseModalOpen}
+        onClose={() => setIsExpenseModalOpen(false)}
+        onCreated={() => fetchAllData()}
+        onUpdated={() => fetchAllData()}
+        expense={selectExpense}
+        expenseMode={expenseMode}
+        onSwitchToEdit={() => setExpenseMode("EDIT")}
+        onSwitchToView={() => setExpenseMode("VIEW")}
+      />
+      <TransferCreateModal
+        visible={isTransferModalOpen}
+        onClose={() => setIsTransferModalOpen(false)}
+        onCreated={() => fetchAllData()}
+        onUpdated={() => fetchAllData()}
+        transfer={selectTransfer}
+        transferMode={transferMode}
+        onSwitchToEdit={() => setTransferMode("EDIT")}
+        onSwitchToView={() => setTransferMode("VIEW")}
+      />
     </div>
   );
 }

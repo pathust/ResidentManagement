@@ -36,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -716,7 +718,7 @@ public class HouseholdService {
             throw new BusinessException("Household code already exists: " + dto.getNewHouseholdCode());
         }
 
-        com.soict.entity.household.Household to = new com.soict.entity.household.Household();
+        Household to = new Household();
         to.setCode(dto.getNewHouseholdCode().trim());
         to.setWard(from.getWard());
         to.setWardId(from.getWard() != null ? from.getWard().getId() : null);
@@ -724,16 +726,16 @@ public class HouseholdService {
         to = householdRepository.save(to);
 
         long headCount = dto.getMembers().stream()
-                .filter(m -> java.lang.Boolean.TRUE.equals(m.getIsHead()))
+                .filter(m -> Boolean.TRUE.equals(m.getIsHead()))
                 .count();
         if (headCount != 1) {
             throw new BusinessException("Exactly one member must be marked as head for the new household");
         }
 
-        List<com.soict.entity.person.Person> persons = new java.util.ArrayList<>();
-        List<com.soict.entity.household.HouseholdMembership> fromMemberships = new java.util.ArrayList<>();
+        List<Person> persons = new ArrayList<>();
+        List<HouseholdMembership> fromMemberships = new ArrayList<>();
 
-        for (com.soict.dto.household.HouseholdSplitMemberCreateDTO m : dto.getMembers()) {
+        for (HouseholdSplitMemberCreateDTO m : dto.getMembers()) {
             var p = personRepository.findById(m.getPersonId())
                     .orElseThrow(() -> new ResourceNotFoundException("Person not found: " + m.getPersonId()));
             var memOpt = membershipRepository.findActiveByPersonId(p.getId());
@@ -755,13 +757,22 @@ public class HouseholdService {
         split.setNote(dto.getNote());
         split = householdSplitRepository.save(split);
 
-        List<HouseholdSplitMember> splitMembers = new java.util.ArrayList<>();
+        List<HouseholdSplitMember> splitMembers = new ArrayList<>();
+        
+        // IMPORTANT: Close old memberships FIRST before creating new ones
+        for (int i = 0; i < persons.size(); i++) {
+            var oldMem = fromMemberships.get(i);
+            oldMem.setEndDate(splitDate);
+            membershipRepository.save(oldMem);
+        }
+        
+        // Flush to ensure old memberships are closed in database
+        membershipRepository.flush();
+
+        // Now create new memberships
         for (int i = 0; i < persons.size(); i++) {
             var p = persons.get(i);
             var oldMem = fromMemberships.get(i);
-
-            oldMem.setEndDate(splitDate);
-            membershipRepository.saveAndFlush(oldMem);
 
             var newMem = new HouseholdMembership();
             newMem.setHousehold(to);
@@ -772,7 +783,7 @@ public class HouseholdService {
             newMem.setPrevPermAddressWard(oldMem.getPrevPermAddressWard());
             newMem.setPrevPermAddressDetails(oldMem.getPrevPermAddressDetails());
 
-            boolean isHead = java.lang.Boolean.TRUE.equals(dto.getMembers().get(i).getIsHead());
+            boolean isHead = Boolean.TRUE.equals(dto.getMembers().get(i).getIsHead());
             if (isHead) {
                 newMem.setIsHouseholdHead(true);
                 newMem.setRelationToHead("Chủ hộ");
@@ -783,7 +794,7 @@ public class HouseholdService {
             p.setCurrentHouseholdId(to.getId());
             p.setPermAddressWardId(to.getWardId());
             p.setPermAddressWard(to.getWard());
-            p.setUpdatedAt(java.time.LocalDateTime.now());
+            p.setUpdatedAt(LocalDateTime.now());
             p.setPermAddressDetails(to.getHouseAddressDetails());
             personRepository.save(p);
 
@@ -799,7 +810,7 @@ public class HouseholdService {
         var out = householdSplitMapper.toDTO(split);
         var memberDTOs = splitMembers.stream()
                 .map(householdSplitMemberMapper::toDTO)
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
         out.setMembers(memberDTOs);
         return out;
     }
