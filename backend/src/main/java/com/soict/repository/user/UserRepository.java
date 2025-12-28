@@ -1,6 +1,8 @@
 package com.soict.repository.user;
 
 import com.soict.entity.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -17,5 +19,10 @@ public interface UserRepository extends JpaRepository<User, Integer>, JpaSpecifi
             "LEFT JOIN FETCH rp.permission " +
             "WHERE u.username = :username")
     Optional<User> findByUsernameWithDetails(@Param("username") String username);
+
     boolean existsByUsername(String username);
+
+    Optional<User> findByUsername(String username);
+
+    Page<User> findByRoleId(Integer roleId, Pageable pageable);
 }

@@ -15,14 +15,24 @@ export default function LoginPage() {
 
   const onFinish = async (values) => {
     setLoading(true);
-    const result = await login(values.username, values.password);
-    setLoading(false);
 
-    if (result.success) {
-      message.success("Đăng nhập thành công!");
-      router.replace("/dashboard");
-    } else {
-      message.error(result.error || "Đăng nhập thất bại!");
+    try {
+      const result = await login(values.username, values.password);
+
+      if (result.success) {
+        message.success("Đăng nhập thành công!");
+        router.replace("/dashboard");
+        router.refresh();
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        router.replace("/dashboard");
+      } else {
+        message.error(result.error || "Đăng nhập thất bại!");
+      }
+    } catch (error) {
+      message.error("Đã xảy ra lỗi. Vui lòng thử lại!");
+    } finally {
+      setLoading(false);
     }
   };
 

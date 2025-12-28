@@ -4,6 +4,7 @@ import com.soict.entity.household.Household;
 import com.soict.entity.location.Ward;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,8 +32,9 @@ public class HouseholdAddressChange {
     @Column(name = "from_address_details")
     private String fromAddressDetails;
 
-    @Column(name = "to_address_ward_id", nullable = false)
-    private Integer toAddressWardId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_address_ward_id", nullable = false)
+    private Ward toAddressWard;
 
     @Column(name = "to_address_details")
     private String toAddressDetails;
@@ -40,6 +42,8 @@ public class HouseholdAddressChange {
     @Column(name = "change_date", nullable = false)
     private LocalDate changeDate;
 
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
 }

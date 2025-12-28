@@ -1,27 +1,21 @@
 package com.soict.dto.user;
 
-import jakarta.validation.constraints.*;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class UserCreateDTO {
-
-    @NotBlank
-    @Size(min = 4, max = 100)
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 100, message = "Username must be between 3 and 100 characters")
     private String username;
 
-    @NotBlank
-    @Size(min = 8, max = 100)
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
-    @NotNull
+    @NotNull(message = "Role ID is required")
     private Integer roleId;
 
     private Integer manageWardId;

@@ -1,6 +1,7 @@
 
-package com.soict.controller;
+package com.soict.controller.person;
 
+import com.soict.dto.household.HouseholdMembershipDTO;
 import com.soict.dto.person.*;
 import com.soict.service.PersonService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,5 +78,21 @@ public class PersonController {
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         personService.deletePerson(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get all household memberships of a person")
+    @GetMapping("/{id}/memberships")
+    @PreAuthorize("hasAnyAuthority('VIEW_PERSON', 'ROLE_ADMIN')")
+    public ResponseEntity<List<HouseholdMembershipDTO>> getMemberships(@PathVariable Integer id) {
+        return ResponseEntity.ok(personService.getMembershipsByPersonId(id));
+    }
+
+    @Operation(summary = "Get household memberships of a person with pagination")
+    @GetMapping("/{id}/memberships/page")
+    @PreAuthorize("hasAnyAuthority('VIEW_PERSON', 'ROLE_ADMIN')")
+    public ResponseEntity<Page<HouseholdMembershipDTO>> getMembershipsPaginated(
+            @PathVariable Integer id,
+            Pageable pageable) {
+        return ResponseEntity.ok(personService.getMembershipsByPersonIdPaginated(id, pageable));
     }
 }

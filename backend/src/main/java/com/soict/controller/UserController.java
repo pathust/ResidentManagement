@@ -1,67 +1,80 @@
 package com.soict.controller;
 
+import com.soict.dto.user.ChangePasswordDTO;
 import com.soict.dto.user.UserCreateDTO;
-import com.soict.dto.user.UserDTO;
+import com.soict.dto.user.UserResponseDTO;
 import com.soict.dto.user.UserUpdateDTO;
 import com.soict.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/admin/users")
-@RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@RequestMapping("/api/users")
 @Tag(name = "User Management", description = "APIs for managing users")
-
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/all")
-    public List<UserDTO> getAllUsers() {
-        return userService.getAllUsers();
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
+    @Operation(summary = "Get all users with pagination")
     @GetMapping
-    public Page<UserDTO> getUsersPaginated(
-            Pageable pageable,
-            @RequestParam(required = false) Integer manageWardId,
-            @RequestParam(required = false) Integer roleId,
-            @RequestParam(required = false) String status
-    ) {
-        return userService.getUsersPaginated(pageable, manageWardId, roleId, status);
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Page<UserResponseDTO>> getAllUsers(
+            @Parameter(description = "Pagination parameters") Pageable pageable,
+            @RequestParam(required = false) Integer roleId) {
+        return ResponseEntity.ok(userService.getAllUsers(pageable, roleId));
     }
 
+    @Operation(summary = "Get user by ID")
     @GetMapping("/{id}")
-    public UserDTO getUserById(@PathVariable Integer id) {
-        return userService.getUserById(id);
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Integer id) {
+        return ResponseEntity.ok(userService.getUser(id));
     }
 
+    @Operation(summary = "Create a new user")
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserDTO createUser(@Valid @RequestBody UserCreateDTO dto) {
-        return userService.createUser(dto);
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.createUser(dto));
     }
 
+    @Operation(summary = "Update user details")
     @PutMapping("/{id}")
-    public UserDTO updateUser(
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<UserResponseDTO> updateUser(
             @PathVariable Integer id,
-            @Valid @RequestBody UserUpdateDTO dto
-    ) {
-        return userService.updateUser(id, dto);
+            @Valid @RequestBody UserUpdateDTO dto) {
+        return ResponseEntity.ok(userService.updateUser(id, dto));
     }
 
+    @Operation(summary = "Change user password")
+    @PutMapping("/{id}/password")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> changePassword(
+            @PathVariable Integer id,
+            @Valid @RequestBody ChangePasswordDTO dto) {
+        userService.changePassword(id, dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Delete (disable) user")
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable Integer id) {
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
         userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

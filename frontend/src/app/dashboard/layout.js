@@ -1,7 +1,16 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
-import { Layout, Menu, Input, Badge, Avatar, Space, Typography, Button } from "antd";
+import {
+  Layout,
+  Menu,
+  Input,
+  Badge,
+  Avatar,
+  Space,
+  Typography,
+  Button,
+} from "antd";
 import {
   HomeOutlined,
   TeamOutlined,
@@ -10,9 +19,13 @@ import {
   BarChartOutlined,
   BellOutlined,
   SearchOutlined,
+  WalletOutlined,
+  DollarOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import Link from "next/link";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -26,7 +39,7 @@ export default function DashboardLayout({ children }) {
   const menuItems = [
     {
       key: "/dashboard",
-      icon: <TeamOutlined />,
+      icon: <BarChartOutlined />,
       label: "Tổng quan",
     },
     {
@@ -45,11 +58,21 @@ export default function DashboardLayout({ children }) {
       label: "Tạm trú - Tạm vắng",
     },
     {
-      key: "/dashboard/thongke",
-      icon: <BarChartOutlined />,
-      label: "Thống kê & Tìm kiếm",
+      key: "/dashboard/quanlyphi",
+      icon: <DollarOutlined />,
+      label: "Quản lý Phí",
     },
-  ];  
+    {
+      key: "/dashboard/quanlyquy",
+      icon: <WalletOutlined />,
+      label: "Quản lý Quỹ",
+    },
+    {
+      key: "/dashboard/lichsu",
+      icon: <HistoryOutlined />,
+      label: "Lịch sử Thay đổi",
+    },
+  ];
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -76,7 +99,7 @@ export default function DashboardLayout({ children }) {
             color: "#1890ff",
           }}
         >
-          {collapsed ? "QLD" : "Quản lý Dân cư"}
+          {collapsed ? "QLDC" : "Quản lý Dân cư"}
         </div>
         <Menu
           mode="inline"
@@ -111,7 +134,7 @@ export default function DashboardLayout({ children }) {
             <Badge count={5}>
               <BellOutlined style={{ fontSize: 20, color: "#595959" }} />
             </Badge>
-            
+
             <Space size="middle" align="center">
               <Avatar size={40} src="https://i.pravatar.cc/40" />
               <div style={{ lineHeight: 1.2 }}>
@@ -121,12 +144,26 @@ export default function DashboardLayout({ children }) {
                   </Text>
                 </div>
                 <div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Tổ trưởng
+                  <Text type="secondary" style={{ fontSize: 14 }}>
+                    {user?.role === "ADMIN"
+                      ? "Quản lý"
+                      : user?.role === "MANAGER"
+                      ? "Tổ trưởng"
+                      : user?.role === "COLLECTOR"
+                      ? "Thủ quỹ"
+                      : "Công dân"}
                   </Text>
                 </div>
               </div>
-              <Button type="text" danger onClick={logout}>
+              {user?.role === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  className="border rounded-md px-2 h-8 flex items-center justify-center cursor-pointer"
+                >
+                  Quản lý tài khoản
+                </Link>
+              )}
+              <Button onClick={logout} danger>
                 Đăng xuất
               </Button>
             </Space>

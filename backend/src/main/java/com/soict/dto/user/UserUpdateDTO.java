@@ -1,24 +1,16 @@
 package com.soict.dto.user;
 
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.soict.entity.user.User;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class UserUpdateDTO {
-    @Size(min = 8, max = 100)
-    private String password;
+    @NotNull(message = "Status is required")
+    private User.UserStatus status;
 
+    @NotNull(message = "Role ID is required")
     private Integer roleId;
 
     private Integer manageWardId;
-
-    @Pattern(regexp = "ACTIVE|DISABLED", message = "Status must be ACTIVE or DISABLED")
-    private String status;
 }

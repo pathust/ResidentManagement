@@ -3,6 +3,7 @@ package com.soict.entity.household.event;
 import com.soict.entity.household.Household;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ public class HouseholdSplit {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 }

@@ -1,14 +1,15 @@
-'use client';
+"use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { authAPI } from "@/services/api";
+import { authAPI, locationAPI } from "@/services/api";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [util, setUtil] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -20,14 +21,34 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    const utilManager = async () => {
+      if (user) {
+        if (util === null) {
+          const provincesData = await locationAPI.getAllProvinces();
+          const ethnicitiesData = await locationAPI.getAllEthnicities();
+
+          setUtil({
+            provincesData,
+            ethnicitiesData,
+          });
+        }
+      }
+    };
+
+    utilManager();
+  }, [user]);
+
   const login = async (username, password) => {
     try {
       const response = await authAPI.login(username, password);
 
-      localStorage.setItem("user", JSON.stringify({ username }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ username, role: response.data.role })
+      );
+      setUser({ username, role: response.data.role });
 
-      setUser({ username });
-      
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
@@ -47,7 +68,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, util }}>
       {children}
     </AuthContext.Provider>
   );

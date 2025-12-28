@@ -17,7 +17,6 @@ public class PersonDTO {
     @Size(max = 255)
     private String fullName;
 
-    @NotNull(message = "Date of birth is required")
     private LocalDate dateOfBirth;
 
     @Size(max = 255)
@@ -25,6 +24,7 @@ public class PersonDTO {
 
     private Integer placeOfOriginWardId;
     private String placeOfOriginWardName;
+    private String placeOfOriginProvinceName;
 
     @Size(max = 255)
     private String placeOfOriginDetails;
@@ -57,13 +57,14 @@ public class PersonDTO {
 
     private Integer permAddressWardId;
     private String permAddressWardName;
+    private String permAddressProvinceName;
 
     @Size(max = 255)
     private String permAddressDetails;
 
     private Integer tempAddressWardId;
     private String tempAddressWardName;
-
+    private String tempAddressProvinceName;
     @Size(max = 255)
     private String tempAddressDetails;
 
@@ -81,4 +82,3 @@ public class PersonDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
-

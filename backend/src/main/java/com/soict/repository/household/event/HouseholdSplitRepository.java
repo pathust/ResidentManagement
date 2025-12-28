@@ -2,6 +2,7 @@ package com.soict.repository.household.event;
 
 import com.soict.entity.household.event.HouseholdSplit;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import java.util.List;
 
 // ========== HOUSEHOLD SPLIT REPOSITORY ==========
 @Repository
-public interface HouseholdSplitRepository extends JpaRepository<HouseholdSplit, Integer> {
+public interface HouseholdSplitRepository extends JpaRepository<HouseholdSplit, Integer>, JpaSpecificationExecutor<HouseholdSplit> {
 
     List<HouseholdSplit> findByFromHouseholdIdOrderBySplitDateDesc(Integer fromHouseholdId);
 

@@ -4,7 +4,14 @@ export function middleware(request) {
   	const accessToken = request.cookies.get("access_token");
 	const permissions = request.cookies.get("permissions")?.value;
 	const { pathname } = request.nextUrl;
-	console.log(accessToken, permissions, pathname);
+
+	if (pathname === "/login"){
+		if (accessToken && permissions){
+			return NextResponse.redirect(new URL("/dashboard", request.url));
+		}
+		return NextResponse.next();
+	}
+
 	if (!accessToken || !permissions){
 		const response = NextResponse.redirect(new URL("/login", request.url))
 		response.cookies.delete("access_token");

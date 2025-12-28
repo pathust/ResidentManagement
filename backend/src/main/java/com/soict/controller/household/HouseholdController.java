@@ -1,4 +1,4 @@
-package com.soict.controller;
+package com.soict.controller.household;
 
 import com.soict.dto.household.*;
 import com.soict.service.HouseholdService;
@@ -117,5 +117,41 @@ public class HouseholdController {
             Pageable pageable) {
         return ResponseEntity.ok(householdService.searchHouseholds(
                 code, address, wardId, headName, pageable));
+    }
+
+    @Operation(summary = "Init household with members (create household + memberships)")
+    @PostMapping("/init")
+    @PreAuthorize("hasAnyAuthority('CREATE_HOUSEHOLD', 'ROLE_ADMIN')")
+    public ResponseEntity<HouseholdDetailDTO> initHousehold(
+            @Valid @RequestBody HouseholdInitCreateDTO dto
+    ) {
+        HouseholdDetailDTO result = householdService.initHousehold(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @Operation(summary = "Change a person's household (transfer membership)")
+    @PostMapping("/change-household")
+    @PreAuthorize("hasAnyAuthority('UPDATE_HOUSEHOLD', 'ROLE_ADMIN')")
+    public ResponseEntity<HouseholdChangeDTO> changeHousehold(
+            @Valid @RequestBody HouseholdChangeCreateDTO dto
+    ) {
+        HouseholdChangeDTO result = householdService.changeHousehold(dto);
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "Get all membership history of a household")
+    @GetMapping("/{id}/memberships")
+    @PreAuthorize("hasAnyAuthority('VIEW_HOUSEHOLD', 'ROLE_ADMIN')")
+    public ResponseEntity<List<HouseholdMembershipDTO>> getAllMemberships(@PathVariable Integer id) {
+        return ResponseEntity.ok(householdService.getAllMembershipsByHouseholdId(id));
+    }
+
+    @Operation(summary = "Get all membership history of a household paginated")
+    @GetMapping("/{id}/memberships/page")
+    @PreAuthorize("hasAnyAuthority('VIEW_HOUSEHOLD', 'ROLE_ADMIN')")
+    public ResponseEntity<Page<HouseholdMembershipDTO>> getAllMembershipsPaginated(
+            @PathVariable Integer id,
+            Pageable pageable) {
+        return ResponseEntity.ok(householdService.getAllMembershipsByHouseholdIdPaginated(id, pageable));
     }
 }
