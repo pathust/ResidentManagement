@@ -2,8 +2,8 @@
 
 import React from "react";
 import { Modal, Form, Input, DatePicker, Select, message } from "antd";
-import { locationAPI, personAPI, householdAPI } from "@/services/api";
-import dayjs from "dayjs";
+import { locationAPI, personAPI } from "@/services/api";
+import { householdsAPI } from "@/services/householdsAPI";
 
 const TemporaryResidenceAddModal = ({ open, onClose, onSubmit }) => {
   const [form] = Form.useForm();
@@ -20,7 +20,7 @@ const TemporaryResidenceAddModal = ({ open, onClose, onSubmit }) => {
         const [provincesData, personsData, householdsData] = await Promise.all([
           locationAPI.getAllProvinces(),
           personAPI.getAll(),
-          householdAPI.getAll({ pageSize: 100, pageIndex: 0 })
+          householdsAPI.getAll({ pageSize: 100, pageIndex: 0 })
         ]);
         setProvinces(provincesData);
         setPersons(personsData);

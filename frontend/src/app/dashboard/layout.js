@@ -21,6 +21,7 @@ import {
   SearchOutlined,
   WalletOutlined,
   DollarOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -38,7 +39,7 @@ export default function DashboardLayout({ children }) {
   const menuItems = [
     {
       key: "/dashboard",
-      icon: <TeamOutlined />,
+      icon: <BarChartOutlined />,
       label: "Tổng quan",
     },
     {
@@ -67,9 +68,9 @@ export default function DashboardLayout({ children }) {
       label: "Quản lý Quỹ",
     },
     {
-      key: "/dashboard/thongke",
-      icon: <BarChartOutlined />,
-      label: "Thống kê & Tìm kiếm",
+      key: "/dashboard/lichsu",
+      icon: <HistoryOutlined />,
+      label: "Lịch sử Thay đổi",
     },
   ];
 

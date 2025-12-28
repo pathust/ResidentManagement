@@ -1,7 +1,10 @@
 package com.soict.repository.household;
 
 import com.soict.entity.household.HouseholdMembership;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -10,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface HouseholdMembershipRepository extends JpaRepository<HouseholdMembership, Integer> {
+public interface HouseholdMembershipRepository extends JpaRepository<HouseholdMembership, Integer>, JpaSpecificationExecutor<HouseholdMembership> {
     @Query("SELECT hm FROM HouseholdMembership hm WHERE hm.household.id = :householdId AND hm.endDate IS NULL")
     List<HouseholdMembership> findActiveByHouseholdId(@Param("householdId") Integer householdId);
 
@@ -34,4 +37,7 @@ public interface HouseholdMembershipRepository extends JpaRepository<HouseholdMe
     @Query("SELECT COUNT(DISTINCT hm.household.id) FROM HouseholdMembership hm " +
             "WHERE hm.household.ward.id = :wardId AND hm.endDate IS NULL")
     Long countActiveHouseholdByWardId(@Param("wardId") Integer wardId);
+
+    List<HouseholdMembership> findByPersonId(Integer personId);
+    Page<HouseholdMembership> findByPersonId(Integer personId, Pageable pageable);
 }

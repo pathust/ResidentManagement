@@ -9,7 +9,7 @@ import HouseholdMemberManageModal from "./HouseholdMemberManageModal";
 
 import { householdsAPI } from "@/services/householdsAPI";
 
-const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) => {
+const HouseholdDetailModal = ({ open, onClose, household, members, refresh, refreshMember }) => {
   const [mode, setMode] = useState(null); // "manage", "split", "changeHead" or null
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [searchText, setSearchText] = useState(""); 
@@ -110,7 +110,7 @@ const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) =>
         message.success("Đổi chủ hộ thành công!");
         
         // Refresh cache and close
-        await refresh(household.id);
+        await refreshMember(household.id);
         setMode(null);
         setSelectedRowKeys([]);
         onClose();
@@ -136,7 +136,16 @@ const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) =>
 
   const handleMemberUpdateSuccess = async () => {
     // Refresh cache after member updates
-    await refresh(household.id);
+    await refreshMember(household.id);
+  };
+
+  const refreshOnSplit = async () => {
+    try {
+      await refresh();
+      await refreshMember(household.id);
+    } catch (error) {
+      console.error("Error refreshing members after split:", error);
+    }
   };
 
   return (
@@ -206,6 +215,7 @@ const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) =>
         }}
         household={household}
         selectedMembers={splitMembers}
+        refresh={refreshOnSplit}
       />
 
       <HouseholdMemberManageModal
