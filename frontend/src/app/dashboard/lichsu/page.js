@@ -89,7 +89,7 @@ export default function LichSuPage() {
         deathDeclares,
         tempResidences,
         tempAbsences,
-        permResidences,
+        // permResidences,
       ] = await Promise.all([
         historyAPI.getHeadChanges(params).catch(() => ({ content: [] })),
         historyAPI.getAddressChanges(params).catch(() => ({ content: [] })),
@@ -98,7 +98,7 @@ export default function LichSuPage() {
         historyAPI.getDeathDeclares(params).catch(() => ({ content: [] })),
         historyAPI.getTemporaryResidences(params).catch(() => ({ content: [] })),
         historyAPI.getTemporaryAbsences(params).catch(() => ({ content: [] })),
-        historyAPI.getPermanentResidenceChanges(params).catch(() => ({ content: [] })),
+        // historyAPI.getPermanentResidenceChanges(params).catch(() => ({ content: [] })),
       ]);
 
       // Merge all data với type và metadata
@@ -180,17 +180,17 @@ export default function LichSuPage() {
           description: `Tạm vắng: ${item.fullName}`,
           searchableText: `${item.fullName} ${item.idNumber} ${item.householdNumber}`,
         })),
-        ...(permResidences.content || []).map((item) => ({
-          ...item,
-          type: "PERM_RESIDENCE",
-          category: "PERSON",
-          icon: "🏠",
-          color: "geekblue",
-          label: "Đổi nơi thường trú",
-          date: item.changeDate,
-          description: `Đổi nơi thường trú: ${item.fullName}`,
-          searchableText: `${item.fullName} ${item.idNumber} ${item.householdNumber}`,
-        })),
+        // ...(permResidences.content || []).map((item) => ({
+        //   ...item,
+        //   type: "PERM_RESIDENCE",
+        //   category: "PERSON",
+        //   icon: "🏠",
+        //   color: "geekblue",
+        //   label: "Đổi nơi thường trú",
+        //   date: item.changeDate,
+        //   description: `Đổi nơi thường trú: ${item.fullName}`,
+        //   searchableText: `${item.fullName} ${item.idNumber} ${item.householdNumber}`,
+        // })),
       ];
 
       // Sort by date descending
@@ -436,7 +436,7 @@ export default function LichSuPage() {
                 <Option value="DEATH">🕊️ Khai tử</Option>
                 <Option value="TEMP_RESIDENCE">🏨 Tạm trú</Option>
                 <Option value="TEMP_ABSENCE">✈️ Tạm vắng</Option>
-                <Option value="PERM_RESIDENCE">🏠 Đổi nơi thường trú</Option>
+                {/* <Option value="PERM_RESIDENCE">🏠 Đổi nơi thường trú</Option> */}
               </Select>
               <RangePicker
                 value={dateRange}

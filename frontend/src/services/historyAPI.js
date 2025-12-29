@@ -161,22 +161,22 @@ export const historyAPI = {
   },
 
   // Permanent Residence Changes
-  getPermanentResidenceChanges: async (params = {}) => {
-    const queryParams = new URLSearchParams(params);
-    const response = await fetch(`/api/persons/permanent-residence-changes/page?${queryParams}`, {
-      method: "GET",
-      credentials: "include",
-    });
-    if (!response.ok) throw new Error("Failed to fetch permanent residence changes");
-    return response.json();
-  },
+  // getPermanentResidenceChanges: async (params = {}) => {
+  //   const queryParams = new URLSearchParams(params);
+  //   const response = await fetch(`/api/persons/permanent-residence-changes/page?${queryParams}`, {
+  //     method: "GET",
+  //     credentials: "include",
+  //   });
+  //   if (!response.ok) throw new Error("Failed to fetch permanent residence changes");
+  //   return response.json();
+  // },
 
-  getPermanentResidenceChangeById: async (id) => {
-    const response = await fetch(`/api/persons/permanent-residence-changes/${id}`, {
-      method: "GET",
-      credentials: "include",
-    });
-    if (!response.ok) throw new Error("Failed to fetch permanent residence change");
-    return response.json();
-  },
+  // getPermanentResidenceChangeById: async (id) => {
+  //   const response = await fetch(`/api/persons/permanent-residence-changes/${id}`, {
+  //     method: "GET",
+  //     credentials: "include",
+  //   });
+  //   if (!response.ok) throw new Error("Failed to fetch permanent residence change");
+  //   return response.json();
+  // },
 };
