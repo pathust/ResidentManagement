@@ -161,7 +161,8 @@ export default function HoKhauPage() {
         onClose={() => setIsDetailOpen(false)}
         household={householdData[currentHousehold] || {}}
         members={memberCache[householdData[currentHousehold]?.id] || []}
-        refresh={refreshMemberCache}
+        refreshMember={refreshMemberCache}
+        refresh={fetchHouseholdList}
       />
 
       {/* Modal thêm hộ khẩu */}
