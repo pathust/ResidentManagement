@@ -46,7 +46,7 @@ export default function DashboardPage() {
     name: "",
     gender: undefined,
     ageGroup: undefined,
-    status: undefined
+    status: undefined,
   });
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);

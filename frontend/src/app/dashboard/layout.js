@@ -21,6 +21,7 @@ import {
   SearchOutlined,
   WalletOutlined,
   DollarOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -65,6 +66,11 @@ export default function DashboardLayout({ children }) {
       key: "/dashboard/quanlyquy",
       icon: <WalletOutlined />,
       label: "Quản lý Quỹ",
+    },
+    {
+      key: "/dashboard/lichsu",
+      icon: <HistoryOutlined />,
+      label: "Lịch sử Thay đổi",
     },
   ];
 

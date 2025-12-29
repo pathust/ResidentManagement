@@ -1,23 +1,93 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { Modal, Table, Tag, Button, Input, Space, message } from "antd";
+import React, { useState, useMemo, useEffect } from "react";
+import { Modal, Table, Tag, Button, Input, message } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 
 import HouseholdSplitModal from "./HouseholdSplitModal";
 import HouseholdMemberManageModal from "./HouseholdMemberManageModal";
 
 import { householdsAPI } from "@/services/householdsAPI";
+import { useAuth } from "@/contexts/AuthContext";
 
-const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) => {
+const HouseholdDetailModal = ({ open, onClose, household, members, refresh, refreshMember }) => {
   const [mode, setMode] = useState(null); // "manage", "split", "changeHead" or null
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [searchText, setSearchText] = useState(""); 
+  const [searchText, setSearchText] = useState("");
 
+  const [editNote, setEditNote] = useState(false);
+  const [editAddress, setEditAddress] = useState(false);
+
+  const [noteValue, setNoteValue] = useState(household.notes || "");
+  const [addressValue, setAddressValue] = useState(household.houseAddressDetails || "");
+  const [wardValue, setWardValue] = useState(household.wardName || "");
+  const [provinceValue, setProvinceValue] = useState(household.provinceName || "");
+
+  //state for sub-modals
   const [splitModalOpen, setSplitModalOpen] = useState(false);
   const [splitMembers, setSplitMembers] = useState([]);
 
   const [manageModalOpen, setManageModalOpen] = useState(false);
+
+  //for utility functions
+  const { util } = useAuth();
+
+  const [provinces, setProvinces] = useState([]);
+  const [wards, setWards] = useState([]);
+
+  useEffect(() => {
+    if (util && util.provincesData.length > 0) {
+      setProvinces(util.provincesData.map((p) => ({ id: p.id, name: p.name })));
+    }
+  }, [util]);
+
+  const handleProvinceChange = (value) => {
+    if (!util) return;
+    setProvinceValue(value);
+    const wards = util.provincesData.find((p) => p.id.toString() === value)?.wards || [];
+
+    setWards(wards);
+  };
+
+  const onSubmitAddressChange = async () => {
+    try {
+      await householdsAPI.addressChange({
+        householdId: household.id,
+        toAddressDetails: addressValue,
+        toAddressWardId: wardValue,
+      });
+      message.success("Cập nhật địa chỉ thành công!");
+      setEditAddress(false);
+      await refresh();
+    } catch (error) {
+      console.error("Error updating address:", error);
+      message.error(error.message || "Không thể cập nhật địa chỉ");
+    }
+  };
+
+  const onSubmitNoteChange = async () => {
+    try {
+      await householdsAPI.inforChange(household.id, {
+        wardId: household.wardId,
+        houseAddressDetails: household.houseAddressDetails,
+        notes: noteValue,
+      });
+      message.success("Cập nhật ghi chú thành công!");
+      setEditNote(false);
+      await refresh();
+    } catch (error) {
+      console.error("Error updating note:", error);
+      message.error(error.message || "Không thể cập nhật ghi chú");
+    }
+  };
+
+  const handleClose = () => {
+    setMode(null);
+    setSelectedRowKeys([]);
+    setEditAddress(false);
+    setEditNote(false);
+    onClose();
+  }
 
   const filteredMembers = useMemo(() => {
     if (!searchText) return members;
@@ -110,10 +180,10 @@ const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) =>
         message.success("Đổi chủ hộ thành công!");
         
         // Refresh cache and close
-        await refresh(household.id);
+        await refreshMember(household.id);
         setMode(null);
         setSelectedRowKeys([]);
-        onClose();
+        handleClose();
       } catch (error) {
         console.error("Error changing household head:", error);
         message.error(error.message || "Không thể đổi chủ hộ");
@@ -136,7 +206,16 @@ const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) =>
 
   const handleMemberUpdateSuccess = async () => {
     // Refresh cache after member updates
-    await refresh(household.id);
+    await refreshMember(household.id);
+  };
+
+  const refreshOnSplit = async () => {
+    try {
+      await refresh();
+      await refreshMember(household.id);
+    } catch (error) {
+      console.error("Error refreshing members after split:", error);
+    }
   };
 
   return (
@@ -144,24 +223,148 @@ const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) =>
       <Modal
         title="Thông tin hộ khẩu"
         open={open}
-        onCancel={() => {
-          setMode(null);
-          setSelectedRowKeys([]);
-          onClose();
-        }}
+        onCancel={handleClose}
         footer={null}
         width={900}
         centered
         destroyOnHidden={true}
       >
         {/* Household info */}
-        <div className="mb-4">
-          <p><strong>Mã hộ khẩu:</strong> {household.code}</p>
+        <div className="mb-4 space-y-3">
+          {/* Code */}
           <p>
-            <strong>Địa chỉ:</strong> {household.houseAddressDetails}, {" "}
-            {household.wardName}, {household.provinceName}
+            <strong>Mã hộ khẩu:</strong> {household.code}
           </p>
-          <p><strong>Ghi chú:</strong> {household.notes || "—"}</p>
+
+          {/* Address */}
+          <div className="relative bg-white">
+            <div className="absolute right-2 top-0 flex gap-1">
+              {!editAddress ? (
+                <button
+                  onClick={() => {
+                    setAddressValue(household.houseAddressDetails || "");
+                    handleProvinceChange(util.provincesData.find((p) => p.name === household.provinceName).id.toString() || "");
+                    setWardValue(household.wardId || "");
+                    setEditAddress(true);
+                  }}
+                  className="text-gray-500 hover:text-blue-600 px-4 py-1 border rounded-sm border-blue-600 bg-blue-100 hover:cursor-pointer hover:bg-blue-200"
+                >
+                  ✎
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setEditAddress(false)}
+                    className="text-red-500 hover:text-red-600 px-4 py-1 border rounded-sm border-red-600 bg-red-100 hover:cursor-pointer hover:bg-red-200"
+                  >
+                    ✕
+                  </button>
+                  <button
+                    onClick={onSubmitAddressChange}
+                    className="text-green-600 hover:text-green-700 px-4 py-1 border rounded-sm border-green-600 bg-green-100 hover:cursor-pointer hover:bg-green-200"
+                  >
+                    ✓
+                  </button>
+                </>
+              )}
+            </div>
+
+            <p className="mb-1 font-semibold">Địa chỉ</p>
+
+            {!editAddress ? (
+              <p className="text-sm text-gray-700 p-2">
+                {household.houseAddressDetails},{" "}
+                <span className="mx-1">{household.wardName}</span>
+                <span className="mx-1">{household.provinceName}</span>
+              </p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <input
+                  value={addressValue}
+                  onChange={(e) => setAddressValue(e.target.value)}
+                  className="w-full rounded border px-2 py-1 text-sm"
+                  placeholder="Địa chỉ chi tiết"
+                />
+
+                <div className="flex gap-2">
+                  <select
+                    value={wardValue}
+                    onChange={(e) => setWardValue(e.target.value)}
+                    className="w-1/2 rounded border px-2 py-1 text-sm"
+                  >
+                    {wards.map((ward) => (
+                      <option key={ward.id} value={ward.id}>
+                        {ward.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={provinceValue}
+                    onChange={(e) => handleProvinceChange(e.target.value)}
+                    className="w-1/2 rounded border px-2 py-1 text-sm"
+                  >
+                    {provinces.map((province) => (
+                      <option key={province.id} value={province.id}>
+                        {province.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Notes */}
+          <div className="relative">
+            <div className="absolute right-2 top-0 flex gap-1">
+              {!editNote ? (
+                <button
+                  onClick={() => {
+                    setNoteValue(household.notes || "");
+                    setEditNote(true);
+                  }}
+                  className="text-gray-500 hover:text-blue-600 px-4 py-1 border rounded-sm border-blue-600 bg-blue-100 hover:cursor-pointer hover:bg-blue-200"
+                >
+                  ✎
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setNoteValue(household.notes || "");
+                      setEditNote(false);
+                    }}
+                    className="text-red-500 hover:text-red-600 px-4 py-1 border rounded-sm border-red-600 bg-red-100 hover:cursor-pointer hover:bg-red-200"
+                  >
+                    ✕
+                  </button>
+                  <button
+                    onClick={onSubmitNoteChange}
+                    className="text-green-600 hover:text-green-700 px-4 py-1 border rounded-sm border-green-600 bg-green-100 hover:cursor-pointer hover:bg-green-200"
+                  >
+                    ✓
+                  </button>
+                </>
+              )}
+            </div>
+
+            <p className="mb-1 font-semibold">Ghi chú</p>
+
+            {!editNote ? (
+              <div className="min-h-[4.5rem] whitespace-pre-wrap text-sm text-gray-700 rounded border bg-white px-2 py-1">
+                {household.notes || "—"}
+              </div>
+            ) : (
+              <textarea
+                rows={3}
+                value={noteValue}
+                onChange={(e) => setNoteValue(e.target.value)}
+                className="w-full resize-none rounded border px-2 py-1 text-sm"
+                placeholder="Nhập ghi chú..."
+              />
+            )}
+          </div>
         </div>
 
         {/* Search bar */}
@@ -206,6 +409,7 @@ const HouseholdDetailModal = ({ open, onClose, household, members, refresh }) =>
         }}
         household={household}
         selectedMembers={splitMembers}
+        refresh={refreshOnSplit}
       />
 
       <HouseholdMemberManageModal

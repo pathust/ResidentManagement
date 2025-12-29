@@ -15,7 +15,7 @@ const HouseholdAddModal = ({ open, onClose, onSubmit }) => {
   const [form] = Form.useForm();
   const [members, setMembers] = useState([]);
   const [provinces, setProvinces] = useState([]);
-  const [Wards, setWards] = useState([]);
+  const [wards, setWards] = useState([]);
 
   // confirm modal (shared)
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -227,7 +227,7 @@ const HouseholdAddModal = ({ open, onClose, onSubmit }) => {
                       }
                       disabled={!form.getFieldValue('provinceId')}
                     >
-                      {Wards.map(ward => (
+                      {wards.map(ward => (
                         <Select.Option key={ward.id} value={ward.id}>
                           {ward.name}
                         </Select.Option>
