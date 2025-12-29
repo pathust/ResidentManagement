@@ -384,160 +384,68 @@ export default function DashboardPage() {
       title: "Thao tác",
       key: "action",
       width: 100,
-      fixed: "right",
-      render: (_, record) => (
-        <Button
-          type="link"
-          size="small"
-          onClick={() => {
-            // Navigate to person detail page
-            window.location.href = `/dashboard/nhankhau?id=${record.id}`;
-          }}
-        >
+      render: () => (
+        <Button type="link" size="small">
           Xem chi tiết
         </Button>
       ),
     },
   ];
 
-  // ============ RENDER ============
-
   return (
     <div>
-      {/* Header with Ward Filter */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 24,
-        }}
-      >
-        <Title level={3} style={{ margin: 0 }}>
-          Thống kê & Tìm kiếm
-        </Title>
-        <Space>
-          <Text strong>Lọc theo:</Text>
-          <Select
-            placeholder="Tất cả phường/xã"
-            style={{ width: 250 }}
-            value={selectedWard}
-            onChange={setSelectedWard}
-            allowClear
-            loading={loadingWards}
-            showSearch
-            optionFilterProp="children"
-            filterOption={(input, option) =>
-              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-            }
-            options={[
-              { value: null, label: "Tất cả phường/xã" },
-              ...wardsData.map((ward) => ({
-                value: ward.id,
-                label: `${ward.name} - ${ward.provinceName}`,
-              })),
-            ]}
-          />
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={() => {
-              if (selectedWard) {
-                fetchWardStats(selectedWard);
-              } else {
-                fetchOverviewStats();
-              }
-            }}
-          >
-            Làm mới
-          </Button>
-        </Space>
-      </div>
+      <Title level={3} style={{ marginBottom: 24 }}>
+        Thống kê & Tìm kiếm
+      </Title>
 
-      {/* Alert khi chọn ward */}
-      {selectedWard && (
-        <Alert
-          message={`Đang hiển thị thống kê của: ${
-            wardsData.find((w) => w.id === selectedWard)?.name || ""
-          }`}
-          type="info"
-          showIcon
-          closable
-          onClose={() => setSelectedWard(null)}
-          style={{ marginBottom: 16 }}
-        />
-      )}
-
-      {/* ============ SECTION 1: SEARCH PANEL ============ */}
+      {/* Search Panel */}
       <Card style={{ marginBottom: 24 }}>
         <Space direction="vertical" style={{ width: "100%" }} size="large">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Title level={5} style={{ margin: 0 }}>
-              <FilterOutlined /> Tìm kiếm nâng cao
-            </Title>
-            {hasSearched && (
-              <Button onClick={handleResetSearch} size="small">
-                Xóa bộ lọc
-              </Button>
-            )}
-          </div>
-
+          <Title level={5}>Tìm kiếm nâng cao</Title>
           <Space size="middle" wrap>
-            <Input
-              placeholder="Họ và tên"
+            <Input 
+              placeholder="Họ và tên" 
               style={{ width: 200 }}
               value={searchParams.name}
-              onChange={(e) =>
-                setSearchParams({ ...searchParams, name: e.target.value })
-              }
-              onPressEnter={() => handleSearch()}
+              onChange={(e) => setSearchParams({...searchParams, name: e.target.value})}
             />
-
-            <Select
-              placeholder="Giới tính"
+            <Select 
+              placeholder="Giới tính" 
               style={{ width: 150 }}
               value={searchParams.gender}
-              onChange={(value) =>
-                setSearchParams({ ...searchParams, gender: value })
-              }
+              onChange={(value) => setSearchParams({...searchParams, gender: value})}
               allowClear
             >
               <Select.Option value="M">Nam</Select.Option>
               <Select.Option value="F">Nữ</Select.Option>
-              <Select.Option value="X">Khác</Select.Option>
             </Select>
-
-            <Select
-              placeholder="Độ tuổi"
+            <Select 
+              placeholder="Độ tuổi" 
               style={{ width: 150 }}
               value={searchParams.ageGroup}
-              onChange={(value) =>
-                setSearchParams({ ...searchParams, ageGroup: value })
-              }
+              onChange={(value) => setSearchParams({...searchParams, ageGroup: value})}
               allowClear
             >
-              <Select.Option value="0-18">0-18 tuổi</Select.Option>
-              <Select.Option value="19-60">19-60 tuổi</Select.Option>
-              <Select.Option value="60+">Trên 60 tuổi</Select.Option>
+              <Select.Option value="0-18">0-18</Select.Option>
+              <Select.Option value="19-60">19-60</Select.Option>
+              <Select.Option value="60+">60+</Select.Option>
             </Select>
-
-            <Select
-              placeholder="Trạng thái"
+            <Select 
+              placeholder="Trạng thái" 
               style={{ width: 180 }}
               value={searchParams.status}
-              onChange={(value) =>
-                setSearchParams({ ...searchParams, status: value })
-              }
+              onChange={(value) => setSearchParams({...searchParams, status: value})}
               allowClear
             >
-              <Select.Option value="ALIVE">Còn sống</Select.Option>
-              <Select.Option value="DEAD">Đã mất</Select.Option>
+              <Select.Option value="living">Đang sinh sống</Select.Option>
+              <Select.Option value="temp">Tạm trú</Select.Option>
+              <Select.Option value="absent">Tạm vắng</Select.Option>
             </Select>
-
-            <Button
-              type="primary"
+            <Button 
+              type="primary" 
               icon={<SearchOutlined />}
-              onClick={() => handleSearch()}
-              loading={searchLoading}
+              onClick={handleSearch}
+              loading={loading}
             >
               Tìm kiếm
             </Button>
@@ -582,19 +490,10 @@ export default function DashboardPage() {
         </Text>}
       </Title>
 
-      {statsLoading ? (
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          {[1, 2, 3, 4].map((i) => (
-            <Col xs={24} sm={12} lg={6} key={i}>
-              <Card>
-                <Skeleton active paragraph={{ rows: 1 }} />
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      ) : displayStats ? (
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col xs={24} sm={12} lg={6}>
+      {/* Age Distribution */}
+      <Card title="Phân bố theo độ tuổi" style={{ marginBottom: 24 }}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={8}>
             <Card hoverable>
               <Statistic
                 title="Tổng dân số"
@@ -614,7 +513,7 @@ export default function DashboardPage() {
               />
             </Card>
           </Col>
-          <Col xs={24} sm={12} lg={6}>
+          <Col xs={24} md={8}>
             <Card hoverable>
               <Statistic
                 title="Nữ"
@@ -635,14 +534,7 @@ export default function DashboardPage() {
             </Card>
           </Col>
         </Row>
-      ) : (
-        <Alert
-          message="Không có dữ liệu thống kê"
-          type="warning"
-          showIcon
-          style={{ marginBottom: 24 }}
-        />
-      )}
+      </Card>
 
       {/* ============ SECTION 3: AGE DISTRIBUTION ============ */}
       {displayStats && (
