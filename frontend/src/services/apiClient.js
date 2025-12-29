@@ -1,38 +1,48 @@
 // src/services/apiClient.js
-import axios from 'axios';
 
-const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+async function apiClient(
+  endpoint,
+  {
+    method = "GET",
+    headers = {},
+    body,
+    ...customConfig
+  } = {}
+) {
 
-// Request interceptor để thêm token
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  const config = {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+    ...customConfig,
+  };
+
+  const response = await fetch(endpoint, config);
+
+  // 🔴 Xử lý 401 (giống interceptor response)
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
     }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+    throw new Error("Unauthorized");
   }
-);
 
-// Response interceptor để xử lý lỗi
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Redirect to login if unauthorized
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
+  // ❌ lỗi HTTP khác
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw {
+      status: response.status,
+      message: errorData.message || "Request failed",
+      data: errorData,
+    };
   }
-);
+
+  // ✅ parse JSON
+  const result = await response.json();
+  return result;
+}
 
 export default apiClient;

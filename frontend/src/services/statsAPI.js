@@ -5,7 +5,7 @@ export const statsAPI = {
   // Thống kê tổng quan nhân khẩu
   getOverviewPersons: async () => {
     try {
-      const { data } = await apiClient.get('/api/stats/overview/persons');
+      const data = await apiClient('/api/stats/overview/persons');
       return data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Không thể tải thống kê nhân khẩu');
@@ -15,7 +15,7 @@ export const statsAPI = {
   // Thống kê tổng quan hộ khẩu
   getOverviewHouseholds: async () => {
     try {
-      const { data } = await apiClient.get('/api/stats/overview/households');
+      const data = await apiClient('/api/stats/overview/households');
       return data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Không thể tải thống kê hộ khẩu');
@@ -25,7 +25,7 @@ export const statsAPI = {
   // Thống kê nhân khẩu theo phường/xã
   getWardPersons: async (wardId) => {
     try {
-      const { data } = await apiClient.get(`/api/stats/wards/${wardId}/persons`);
+      const data = await apiClient(`/api/stats/wards/${wardId}/persons`);
       return data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Không thể tải thống kê phường/xã');
@@ -35,7 +35,7 @@ export const statsAPI = {
   // Thống kê hộ khẩu theo phường/xã
   getWardHouseholds: async (wardId) => {
     try {
-      const { data } = await apiClient.get(`/api/stats/wards/${wardId}/households`);
+      const data = await apiClient(`/api/stats/wards/${wardId}/households`);
       return data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Không thể tải thống kê hộ khẩu theo phường');

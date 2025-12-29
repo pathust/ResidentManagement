@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, use } from "react";
 import {
   Card,
   Row,
@@ -14,7 +14,6 @@ import {
   Table,
   Tag,
   message,
-  Spin,
   Skeleton,
   Empty,
   Alert
@@ -23,14 +22,14 @@ import {
   SearchOutlined,
   UserOutlined,
   TeamOutlined,
-  RiseOutlined,
   HomeOutlined,
   ManOutlined,
   WomanOutlined,
   ReloadOutlined,
   FilterOutlined
 } from "@ant-design/icons";
-import { statsAPI, locationAPI, personAPI } from "@/services/api";
+import { statsAPI, personAPI } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const { Title, Text } = Typography;
 
@@ -64,6 +63,7 @@ export default function DashboardPage() {
   const [wardPersonStats, setWardPersonStats] = useState(null);
   const [wardHouseholdStats, setWardHouseholdStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(false);
+  const { util } = useAuth();
 
   // ============ UTILITY FUNCTIONS ============
 
@@ -99,9 +99,11 @@ export default function DashboardPage() {
 
   // Fetch danh sách phường/xã
   const fetchWards = async () => {
+    if (!util || !util.provincesData || util.provincesData.length === 0) return;
+
     setLoadingWards(true);
     try {
-      const data = await locationAPI.getAllWards();
+      const data = util.provincesData.flatMap(item => item.wards);
       setWardsData(data);
     } catch (error) {
       console.error("Error fetching wards:", error);
@@ -121,6 +123,8 @@ export default function DashboardPage() {
       ]);
       setOverviewStats(personStats);
       setHouseholdStats(householdData);
+
+      console.log("Overview person stats:", personStats, "household stats:", householdData);
     } catch (error) {
       console.error("Error fetching overview stats:", error);
       message.error(error.message);
@@ -166,13 +170,14 @@ export default function DashboardPage() {
     setHasSearched(true);
 
     try {
-      const response = await personAPI.searchPaginated({
-        search: searchParams.name.trim() || undefined,
-        wardId: selectedWard || undefined,
-        status: searchParams.status || undefined,
-        page: page - 1, // Backend uses 0-based indexing
-        size: pageSize
-      });
+      const response = await personAPI.getAll();
+      // ({
+      //   search: searchParams.name.trim() || undefined,
+      //   wardId: selectedWard || undefined,
+      //   status: searchParams.status || undefined,
+      //   page: page - 1, // Backend uses 0-based indexing
+      //   size: pageSize
+      // });
 
       // Filter theo age group (client-side)
       let filteredData = response.content || [];
@@ -223,9 +228,12 @@ export default function DashboardPage() {
 
   // Load initial data
   useEffect(() => {
-    fetchWards();
     fetchOverviewStats();
   }, []);
+
+  useEffect(() => {
+    fetchWards();
+  }, [util]);
 
   // Load ward stats when ward is selected
   useEffect(() => {
