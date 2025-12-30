@@ -43,7 +43,7 @@ export async function GET(req, { params }) {
         }
         
         const result = await response.json();
-        return NextResponse.json(result, { status: 200 });
+        return NextResponse.json(result?.content || result, { status: 200 });
     } catch (error) {
         console.error("Error during fetch:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
