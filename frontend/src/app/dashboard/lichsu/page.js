@@ -26,7 +26,7 @@ import {
   HeartOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { historyAPI } from "@/services/api";
+import { personAPI, householdsAPI, historyAPI } from "@/services/api";
 import HistoryDetailModal from "@/components/HistoryDetailModal";
 import * as XLSX from "xlsx";
 
@@ -66,9 +66,33 @@ export default function LichSuPage() {
     total: 0,
   });
 
+  // Link data
+  const [personsMap, setPersonsMap] = useState([]);
+  const [householdsMap, setHouseholdsMap] = useState([]);
+
+  const fetchMapData = async () => {
+    try {
+      const persons = await personAPI.getAll();
+      const households = await householdsAPI.getAll();
+
+      console.log("Fetched persons:", persons);
+      console.log("Fetched households:", households);
+
+      setPersonsMap(persons);
+      setHouseholdsMap(households);
+    } catch (error) {
+      console.error("Error fetching map data:", error);
+    }
+  };
+
   useEffect(() => {
-    fetchAllHistory();
+    fetchMapData();
   }, []);
+
+  useEffect(() => {
+    if (!personsMap.length || !householdsMap.length) return;
+    fetchAllHistory();
+  }, [personsMap, householdsMap]);
 
   useEffect(() => {
     applyFilters();
@@ -100,6 +124,62 @@ export default function LichSuPage() {
         historyAPI.getTemporaryAbsences(params).catch(() => ({ content: [] })),
         // historyAPI.getPermanentResidenceChanges(params).catch(() => ({ content: [] })),
       ]);
+
+      //Mapping additional info
+
+      headChanges.content.forEach(item => {
+        const householdCode = householdsMap.find(h => h.id === item.householdId)?.code || '';
+        const fromPerson = personsMap.find(p => p.id === item.fromPersonId) || {};
+        const toPerson = personsMap.find(p => p.id === item.toPersonId) || {}
+        item.householdCode = householdCode;
+        item.fromPersonName = fromPerson.fullName || '';
+        item.fromPersonIdNumber = fromPerson.idNumber || '';
+        item.toPersonName = toPerson.fullName || '';
+        item.toPersonIdNumber = toPerson.idNumber || '';
+      });
+
+      addressChanges.content.forEach(item => {
+        const householdName = householdsMap.find(h => h.id === item.householdId)?.code || '';
+        item.householdCode = householdName;
+        item.fromAddressWardName = item.fromAddressWard || '';
+        item.toAddressWardName = item.toAddressWard || '';
+      });
+
+      splits.content.forEach(item => {
+        const fromHousehold = householdsMap.find(h => h.id === item.fromHouseholdId) || {};
+        const toHousehold = householdsMap.find(h => h.id === item.toHouseholdId) || {};
+        item.fromHouseholdCode = fromHousehold.code || '';
+        item.toHouseholdCode = toHousehold.code || '';
+      });
+
+      birthDeclares.content.forEach(item => {
+        item.fullName = item.fullName || '';
+        const declarer = personsMap.find(p => p.id === item.declarerId) || {};
+        item.declarerName = declarer.fullName || '';
+        item.declarerIdNumber = declarer.idNumber || '';
+      });
+
+      deathDeclares.content.forEach(item => {
+        item.fullName = item.fullName || '';
+        const declarer = personsMap.find(p => p.id === item.declarerId) || {};
+        item.declarerName = declarer.fullName || '';
+      });
+
+      tempResidences.content.forEach(item => {
+        const person = personsMap.find(p => p.id === item.personId) || {};
+        item.fullName = person.fullName || '';
+        item.idNumber = person.idNumber || '';
+        const household = householdsMap.find(h => h.id === item.householdId) || {};
+        item.householdNumber = household.code || '';
+      });
+
+      tempAbsences.content.forEach(item => {
+        const person = personsMap.find(p => p.id === item.personId) || {};
+        item.fullName = person.fullName || '';
+        item.idNumber = person.idNumber || '';
+        const household = householdsMap.find(h => h.id === item.householdId) || {};
+        item.householdNumber = household.code || '';
+      });
 
       // Merge all data với type và metadata
       const merged = [

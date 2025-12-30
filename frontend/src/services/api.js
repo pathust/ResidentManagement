@@ -781,3 +781,5 @@ export const userManagementAPI = {
 export { statsAPI } from './statsAPI';
 
 export { historyAPI } from './historyAPI';
+
+export { householdsAPI } from './householdsAPI';
