@@ -121,6 +121,7 @@ export default function DashboardPage() {
         statsAPI.getOverviewPersons(),
         statsAPI.getOverviewHouseholds()
       ]);
+      console.log("Fetched overview stats:", personStats, householdData);
       setOverviewStats(personStats);
       setHouseholdStats(householdData);
 
@@ -251,8 +252,8 @@ export default function DashboardPage() {
   const displayStats = useMemo(() => {
     if (wardPersonStats) {
       return {
-        total: wardPersonStats.totalInWard,
-        alive: wardPersonStats.aliveInWard,
+        total: wardPersonStats.totalPersons,
+        alive: wardPersonStats.alivePersons,
         male: wardPersonStats.genderStats?.male || 0,
         female: wardPersonStats.genderStats?.female || 0,
         age0To18: wardPersonStats.ageGroupStats?.age0To17 || 0,
@@ -265,8 +266,8 @@ export default function DashboardPage() {
 
     if (overviewStats) {
       return {
-        total: overviewStats.total,
-        alive: overviewStats.alive,
+        total: overviewStats.totalPersons,
+        alive: overviewStats.alivePersons,
         male: overviewStats.genderStats?.male || 0,
         female: overviewStats.genderStats?.female || 0,
         age0To18: overviewStats.ageGroupStats?.age0To17 || 0,
